@@ -213,6 +213,8 @@ textarea.inp{resize:vertical;min-height:70px}
 .cd.sel{background:var(--p);color:var(--w)}
 .cd.has{color:var(--p3);font-weight:600}
 .cd.dis{color:rgba(255,255,255,.2);cursor:default}
+.cd.closed{background:rgba(239,68,68,.15);color:var(--red);cursor:default;text-decoration:line-through}
+.cd.closed:hover{background:rgba(239,68,68,.15);color:var(--red)}
 
 .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .tsl{padding:10px 4px;text-align:center;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--bd);background:var(--w05);transition:all .15s;color:var(--w80)}
@@ -298,6 +300,8 @@ textarea.inp{resize:vertical;min-height:70px}
 .bcancel{background:rgba(239,68,68,.15);color:var(--red)}
 .bdone{background:rgba(124,58,237,.15);color:var(--p3)}
 .bblk{background:rgba(239,68,68,.15);color:var(--red)}
+.bbad{background:rgba(245,158,11,.15);color:var(--amber);font-size:11px}
+.bbad-high{background:rgba(239,68,68,.15);color:var(--red);font-size:11px}
 
 .abtn{padding:5px 11px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--w05);color:var(--w80);font-family:'Heebo',sans-serif;transition:all .15s;margin-left:3px}
 .abtn:hover{border-color:var(--p);color:var(--pl)}
@@ -459,7 +463,7 @@ textarea.inp{resize:vertical;min-height:70px}
 <div class="switch-panel" id="sw-panel">
   <div class="sp-title">החלף משתמש</div>
   <div id="sw-users-list"></div>
-  <div class="sp-add" onclick="addAccount()">+ הוסף חשבון</div>
+  <div class="sp-add" id="sp-add-btn">+ הוסף חשבון</div>
 </div>
 
 <!-- MAIN PAGE -->
@@ -690,7 +694,12 @@ textarea.inp{resize:vertical;min-height:70px}
 
       <!-- CALENDAR WEEK VIEW -->
       <div class="dsec" id="d-cal">
-        <div class="sec-t">📅 לוח תורים שבועי <span class="sec-lbl">יוני 2026</span>
+        <div class="sec-t" style="flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button class="abtn" id="week-prev" style="font-size:16px;padding:6px 12px">→</button>
+            <span>📅 <span id="week-label">השבוע</span></span>
+            <button class="abtn" id="week-next" style="font-size:16px;padding:6px 12px">←</button>
+          </div>
           <div style="margin-right:auto;display:flex;gap:8px">
             <button class="abtn" onclick="openM('m-appt')">+ תור</button>
             <button class="abtn" onclick="openM('m-break')">☕ הפסקה</button>
@@ -748,7 +757,7 @@ textarea.inp{resize:vertical;min-height:70px}
         <div class="cbox">
           <div class="cbox-b" style="padding:0">
             <table class="dtbl">
-              <thead><tr><th>שם</th><th>אימייל</th><th>טלפון</th><th>ביקורים</th><th>תור אחרון</th><th>סטטוס</th><th>פעולות</th></tr></thead>
+              <thead><tr><th>שם</th><th>טלפון</th><th>ביקורים</th><th>ביטולים</th><th>נקודות</th><th>תור אחרון</th><th>פעולות</th></tr></thead>
               <tbody id="clients-tb"></tbody>
             </table>
           </div>
@@ -781,7 +790,13 @@ textarea.inp{resize:vertical;min-height:70px}
                 <select class="inp"><option>30 דק' לפני</option><option>שעה לפני</option><option selected>3 שעות לפני</option><option>24 שעות לפני</option></select>
                 <label class="ilbl">תורים מראש (ימים)</label>
                 <input class="inp" type="number" value="30" min="1" max="90"/>
-                <button class="btnp" style="margin-top:10px" onclick="toast('✅ ההגדרות נשמרו!')">שמור הגדרות</button>
+                <label class="ilbl" style="margin-top:12px">נקודות רעות לחסימה</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input class="inp" type="number" id="bad-threshold" value="3" min="1" max="20" style="width:80px;margin:0"/>
+                <button class="abtn" onclick="setBadThreshold()" style="white-space:nowrap">עדכן סף</button>
+              </div>
+              <div style="font-size:12px;color:var(--w50);margin-top:4px">הלקוח לא יראה את הנקודות הרעות</div>
+              <button class="btnp" style="margin-top:10px" onclick="saveClosedDays()">שמור הגדרות</button>
               </div>
             </div>
             <div class="cbox">
@@ -1009,6 +1024,9 @@ let CU = null, UD = null;
 window._role = 'client';
 window._allAppts = [];
 window._accounts = JSON.parse(localStorage.getItem('bk_accounts') || '[]');
+window._weekOffset = 0;
+window._closedDays = []; // ימים סגורים (0=ראשון, 6=שבת)
+window._badPointsThreshold = 3; // ברירת מחדל - 3 נקודות = חסימה
 
 // Role card listeners – מחוץ ל-onclick כדי שיעבדו עם type="module"
 document.getElementById('rc-client').addEventListener('click', () => {
@@ -1016,6 +1034,18 @@ document.getElementById('rc-client').addEventListener('click', () => {
   document.querySelectorAll('.rc').forEach(c => c.classList.remove('sel'));
   document.getElementById('rc-client').classList.add('sel');
   document.getElementById('biz-fields').classList.add('hidden');
+});
+// Week navigation
+document.getElementById('week-prev')?.addEventListener('click', () => {
+  window._weekOffset--; renderWeekCal();
+});
+document.getElementById('week-next')?.addEventListener('click', () => {
+  window._weekOffset++; renderWeekCal();
+});
+document.getElementById('sp-add-btn')?.addEventListener('click', () => {
+  document.getElementById('sw-panel').classList.remove('open');
+  showSplash();
+  swTab('up');
 });
 document.getElementById('rc-biz').addEventListener('click', () => {
   window._role = 'business';
@@ -1191,11 +1221,15 @@ function updateSwPanel() {
     return updateSwPanel();
   }
   list.innerHTML = accounts.map(a => `
-    <div class="sp-user ${a.email === CU?.email ? 'current' : ''}" onclick="switchToAccount('${a.email}')">
+    <div class="sp-user ${a.email === CU?.email ? 'current' : ''}" data-email="${a.email}">
       <div class="sp-av" style="background:${a.role==='business'?'var(--p2)':'var(--p)'}">${(a.name||a.email)[0].toUpperCase()}</div>
       <div><div class="sp-name">${a.name||a.email}</div><div class="sp-role">${a.role==='business'?'בעל עסק':'לקוח'}</div></div>
       ${a.email === CU?.email ? '<span style="color:var(--green);font-size:11px">פעיל</span>' : ''}
     </div>`).join('');
+  // Event delegation for switch
+  list.querySelectorAll('.sp-user[data-email]').forEach(el => {
+    el.addEventListener('click', () => switchToAccount(el.dataset.email));
+  });
 }
 window.switchToAccount = async function(email) {
   g('sw-panel').classList.remove('open');
@@ -1345,7 +1379,16 @@ async function loadDash() {
   // Appointments table
   renderApptsTable(mine);
 
+  // Load settings
+  try {
+    const thSnap = await get(ref(db, 'settings/' + CU.uid + '/badThreshold'));
+    if (thSnap.exists()) window._badPointsThreshold = thSnap.val();
+    const cdSnap = await get(ref(db, 'settings/' + CU.uid + '/closedDays'));
+    if (cdSnap.exists()) window._closedDays = cdSnap.val();
+  } catch(e) {}
+
   // Calendar week
+  renderWeekCal();
   const times = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
   g('wcal-rows').innerHTML = times.map(t => {
     const slot = todayA.find(a => a.time === t);
@@ -1390,30 +1433,53 @@ function renderApptsTable(appts) {
 async function renderClientsTable(allAppts, usersSnap) {
   const tb = g('clients-tb'); if (!tb) return;
   const myAppts = allAppts.filter(a => a.businessId === CU.uid);
-  // Build client map from appointments
   const clientMap = {};
   myAppts.forEach(a => {
-    if (!clientMap[a.clientId||a.clientName]) {
-      clientMap[a.clientId||a.clientName] = { name:a.clientName, phone:a.clientPhone, visits:0, lastDate:'' };
+    const key = a.clientId||a.clientName||'unknown';
+    if (!clientMap[key]) {
+      clientMap[key] = { id:a.clientId, name:a.clientName, phone:a.clientPhone, visits:0, cancels:0, lastDate:'' };
     }
-    clientMap[a.clientId||a.clientName].visits++;
-    if (a.date > (clientMap[a.clientId||a.clientName].lastDate||'')) clientMap[a.clientId||a.clientName].lastDate = a.date;
+    if (a.status === 'cancelled') clientMap[key].cancels++;
+    else clientMap[key].visits++;
+    if (a.date > (clientMap[key].lastDate||'')) clientMap[key].lastDate = a.date;
   });
+  // Load bad points
+  let badPoints = {};
+  try {
+    const bpSnap = await get(ref(db, 'badpoints/' + CU.uid));
+    if (bpSnap.exists()) badPoints = bpSnap.val();
+  } catch(e) {}
+  // Load blocked
+  let blocked = {};
+  try {
+    const blSnap = await get(ref(db, 'blocked/' + CU.uid));
+    if (blSnap.exists()) blocked = blSnap.val();
+  } catch(e) {}
+
   const clients = Object.entries(clientMap);
   if (clients.length === 0) {
-    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--w50)">אין לקוחות עדיין</td></tr>';
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--w50)">אין לקוחות עדיין</td></tr>';
     return;
   }
-  tb.innerHTML = clients.map(([id, c]) => `
-    <tr>
+  const threshold = window._badPointsThreshold || 3;
+  tb.innerHTML = clients.map(([key, c]) => {
+    const bp = badPoints[key]?.points || 0;
+    const isBlocked = !!blocked[key];
+    return `<tr style="${isBlocked?'opacity:0.5':''}">
       <td><strong>${c.name||'—'}</strong></td>
-      <td>—</td>
       <td>${c.phone||'—'}</td>
-      <td>${c.visits}</td>
+      <td>${c.visits} ביקורים</td>
+      <td>${c.cancels} ביטולים</td>
+      <td>${bp > 0 ? '<span class="sbadge '+(bp>=threshold?'bbad-high':'bbad')+'">⚠️ '+bp+'/'+threshold+'</span>' : '<span class="sbadge bok">תקין</span>'}</td>
       <td>${c.lastDate||'—'}</td>
-      <td><span class="sbadge ${c.visits>=5?'bok':'bpnd'}">${c.visits>=5?'VIP':'רגיל'}</span></td>
-      <td><button class="abtn d" onclick="toast('🚫 חסימה – בקרוב')">🚫 חסום</button></td>
-    </tr>`).join('');
+      <td style="white-space:nowrap">
+        ${isBlocked ? '<button class="abtn g" onclick="unblockClient(\''+key+'\',\''+c.name+'\')">✅ שחרר</button>' :
+          '<button class="abtn d" onclick="addBadPoint(\''+key+'\',\''+c.name+'\')">⚠️ נקודה</button>' +
+          '<button class="abtn d" onclick="blockClientNow(\''+key+'\',\''+c.name+'\')">🚫 חסום</button>'
+        }
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 window.filterAppts = function() { renderApptsTable(window._allAppts); }
@@ -1467,8 +1533,17 @@ window.updateAppt = async function() {
 }
 
 window.cancelAppt = async function(id) {
-  try { await update(ref(db,'appointments/'+id),{status:'cancelled'}); toast('🗑️ בוטל'); loadDash(); }
-  catch(e) { toast('⚠️ שגיאה'); }
+  try {
+    const appt = window._allAppts.find(a => a.id === id);
+    await update(ref(db,'appointments/'+id),{status:'cancelled'});
+    toast('🗑️ התור בוטל');
+    // שאל אם להוסיף נקודה רעה
+    if (appt && appt.clientId) {
+      const addPt = confirm('האם להוסיף נקודה רעה ל-' + (appt.clientName||'לקוח') + '?');
+      if (addPt) await addBadPoint(appt.clientId, appt.clientName);
+    }
+    loadDash();
+  } catch(e) { toast('⚠️ שגיאה'); }
 }
 window.markDone = async function(id) {
   try { await update(ref(db,'appointments/'+id),{status:'completed'}); toast('✅ סומן כהושלם!'); loadDash(); }
@@ -1490,6 +1565,12 @@ window.confirmBook = async function() {
       businessAddress: biz.address || '',
       date, time, service: biz.profession || 'שירות', status:'confirmed', createdAt:Date.now()
     });
+    // עדכן סטטיסטיקות לקוח
+    try {
+      const stats = await getClientStats(biz.id, CU.uid);
+      const noteRef = ref(db, 'clientStats/' + (biz.id||'demo') + '/' + CU.uid);
+      await set(noteRef, {name:UD?.name, booked:stats.booked+1, cancelled:stats.cancelled, lastBooking:date});
+    } catch(e) {}
     g('bcc').classList.add('hidden'); g('bsc').classList.remove('hidden');
     toast('✅ התור נקבע!'); loadClientData();
   } catch(e) { toast('⚠️ שגיאה: ' + e.message); }
@@ -1497,6 +1578,43 @@ window.confirmBook = async function() {
 
 // ── טעינת עמוד קביעת תור עם נתונים אמיתיים ──
 async function loadBookingPage() {
+  // Load closed days for this business
+  const bizId = (window._viewingBiz||{}).id;
+  let closedDays = [6]; // default: שבת
+  if (bizId) {
+    try {
+      const cdSnap = await get(ref(db, 'settings/' + bizId + '/closedDays'));
+      if (cdSnap.exists()) closedDays = cdSnap.val();
+    } catch(e) {}
+  }
+  window._bookingClosedDays = closedDays;
+  // Mark closed days in calendar
+  const calDays = document.querySelectorAll('#booking-page .cd');
+  calDays.forEach(cd => {
+    const dayText = cd.textContent.trim();
+    if (!dayText || cd.classList.contains('dis')) return;
+    // Calculate day of week (June 2026)
+    const dayNum = parseInt(dayText);
+    if (isNaN(dayNum)) return;
+    const date = new Date(2026, 5, dayNum);
+    const dow = date.getDay();
+    if (closedDays.includes(dow)) {
+      cd.classList.add('closed');
+      cd.onclick = null;
+      cd.removeAttribute('onclick');
+    }
+  });
+  // Check if client is blocked
+  if (bizId && CU) {
+    try {
+      const blSnap = await get(ref(db, 'blocked/' + bizId + '/' + CU.uid));
+      if (blSnap.exists()) {
+        toast('⚠️ לא ניתן לקבוע תור בעסק זה');
+        goPage('main-page');
+        return;
+      }
+    } catch(e) {}
+  }
   const biz = window._viewingBiz || {};
   // עדכון כותרת
   const emoji = g('book-biz-emoji'); if (emoji) emoji.textContent = biz.emoji || '🏪';
@@ -1735,6 +1853,158 @@ window.selCat = function(el, cat) {
 document.getElementById('post-txt')?.addEventListener('input', function() {
   const cc = g('post-char'); if(cc) cc.textContent = this.value.length + '/500 תווים';
 });
+
+// ═══ WEEK CALENDAR WITH NAVIGATION ═══
+window.renderWeekCal = function() {
+  const base = new Date();
+  base.setDate(base.getDate() + (window._weekOffset * 7));
+  const sun = new Date(base);
+  sun.setDate(sun.getDate() - sun.getDay());
+  const days = [];
+  const dayNames = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳'];
+  for (let i=0;i<6;i++) {
+    const d = new Date(sun);
+    d.setDate(d.getDate()+i);
+    days.push(d);
+  }
+  // Update header
+  const label = g('week-label');
+  if (label) {
+    const m = sun.toLocaleDateString('he-IL',{month:'long',year:'numeric'});
+    label.textContent = window._weekOffset===0 ? 'השבוע · '+m : m;
+  }
+  // Update week headers
+  const heads = document.querySelectorAll('#d-cal .wh');
+  if (heads.length >= 7) {
+    for (let i=0;i<6;i++) {
+      const d = days[i];
+      const isToday = d.toISOString().split('T')[0] === new Date().toISOString().split('T')[0];
+      heads[i+1].textContent = dayNames[i]+' '+d.getDate()+'/'+(d.getMonth()+1);
+      heads[i+1].style.color = isToday ? 'var(--p3)' : '';
+    }
+  }
+  // Render time rows
+  const times = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
+  const today = new Date().toISOString().split('T')[0];
+  const myAppts = window._allAppts || [];
+  let html = '';
+  times.forEach(t => {
+    html += '<div class="wgrid"><div class="wt">'+t+'</div>';
+    days.forEach(d => {
+      const ds = d.toISOString().split('T')[0];
+      const isToday = ds === today;
+      const slot = myAppts.find(a => a.date===ds && a.time===t && a.status!=='cancelled');
+      const cls = slot ? (slot.status==='confirmed'?'aok':slot.status==='completed'?'adone':'apnd') : '';
+      html += '<div class="wc'+(isToday?' tc':'')+'">';
+      if (slot) html += '<div class="ap '+cls+'" onclick="editAppt(\''+slot.id+'\')">'+slot.clientName+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  const el = g('wcal-rows');
+  if (el) el.innerHTML = html;
+}
+
+// ═══ BAD POINTS SYSTEM ═══
+window.addBadPoint = async function(clientId, clientName) {
+  if (!CU) return;
+  const key = 'badpoints/' + CU.uid + '/' + clientId;
+  try {
+    const snap = await get(ref(db, key));
+    const current = snap.exists() ? snap.val() : {points:0, name:clientName};
+    current.points = (current.points||0) + 1;
+    current.name = clientName;
+    current.lastUpdated = Date.now();
+    await set(ref(db, key), current);
+    const threshold = window._badPointsThreshold || 3;
+    if (current.points >= threshold) {
+      toast('🚫 ' + clientName + ' הגיע ל-' + current.points + ' נקודות! נחסם אוטומטית');
+      await set(ref(db, 'blocked/' + CU.uid + '/' + clientId), {name:clientName, reason:'נקודות רעות', blockedAt:Date.now()});
+    } else {
+      toast('⚠️ נקודה רעה ל-' + clientName + ' (' + current.points + '/' + threshold + ')');
+    }
+    loadDash();
+  } catch(e) { toast('⚠️ שגיאה'); }
+}
+
+window.removeBadPoint = async function(clientId, clientName) {
+  if (!CU) return;
+  const key = 'badpoints/' + CU.uid + '/' + clientId;
+  try {
+    const snap = await get(ref(db, key));
+    if (snap.exists()) {
+      const current = snap.val();
+      current.points = Math.max(0, (current.points||0) - 1);
+      await set(ref(db, key), current);
+      toast('✅ הורדה נקודה ל-' + clientName + ' (' + current.points + ')');
+    }
+    loadDash();
+  } catch(e) { toast('⚠️ שגיאה'); }
+}
+
+window.setBadThreshold = async function() {
+  const val = prompt('כמה נקודות רעות כדי לחסום לקוח?', window._badPointsThreshold);
+  if (val && !isNaN(val)) {
+    window._badPointsThreshold = parseInt(val);
+    await set(ref(db, 'settings/' + CU.uid + '/badThreshold'), parseInt(val));
+    toast('✅ סף חסימה עודכן ל-' + val + ' נקודות');
+  }
+}
+
+// ═══ GET CLIENT STATS (booking count + cancellation count) ═══
+async function getClientStats(bizId, clientId) {
+  const snap = await get(ref(db, 'appointments'));
+  let booked = 0, cancelled = 0;
+  if (snap.exists()) {
+    snap.forEach(c => {
+      const a = c.val();
+      if (a.businessId === bizId && a.clientId === clientId) {
+        if (a.status === 'cancelled') cancelled++;
+        else booked++;
+      }
+    });
+  }
+  return {booked, cancelled};
+}
+
+// ═══ LOAD CLOSED DAYS FROM SETTINGS ═══
+async function loadClosedDays(bizId) {
+  try {
+    const snap = await get(ref(db, 'settings/' + bizId + '/closedDays'));
+    if (snap.exists()) return snap.val();
+  } catch(e) {}
+  return [6]; // ברירת מחדל: שבת סגור
+}
+
+window.saveClosedDays = async function() {
+  if (!CU) return;
+  const days = [];
+  document.querySelectorAll('#d-settings .srow').forEach((row, i) => {
+    const cb = row.querySelector('input[type=checkbox]');
+    if (cb && !cb.checked) days.push(i);
+  });
+  await set(ref(db, 'settings/' + CU.uid + '/closedDays'), days);
+  window._closedDays = days;
+  toast('✅ ימי עבודה נשמרו!');
+}
+
+
+window.blockClientNow = async function(clientId, name) {
+  if (!confirm('לחסום את ' + name + '?')) return;
+  try {
+    await set(ref(db, 'blocked/' + CU.uid + '/' + clientId), {name:name, reason:'חסימה ידנית', blockedAt:Date.now()});
+    toast('🚫 ' + name + ' נחסם');
+    loadDash();
+  } catch(e) { toast('⚠️ שגיאה'); }
+}
+window.unblockClient = async function(clientId, name) {
+  try {
+    await remove(ref(db, 'blocked/' + CU.uid + '/' + clientId));
+    toast('✅ ' + name + ' שוחרר');
+    loadDash();
+  } catch(e) { toast('⚠️ שגיאה'); }
+}
+
 
 window.toast = function(msg) {
   const t=g('the-toast'); t.textContent=msg; t.classList.add('show');
