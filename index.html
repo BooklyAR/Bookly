@@ -1043,9 +1043,18 @@ onAuthStateChanged(auth, async u => {
   g('ls').style.display = 'none';
   if (u) {
     CU = u;
-    const snap = await get(ref(db, 'users/' + u.uid));
-    if (snap.exists()) { UD = snap.val(); enterApp(); }
-    else showSplash();
+    const cached = localStorage.getItem('bk_ud_' + u.uid);
+    if (cached) {
+      UD = JSON.parse(cached);
+      enterApp();
+      get(ref(db, 'users/' + u.uid)).then(snap => {
+        if (snap.exists()) { UD = snap.val(); localStorage.setItem('bk_ud_' + u.uid, JSON.stringify(UD)); }
+      });
+    } else {
+      const snap = await get(ref(db, 'users/' + u.uid));
+      if (snap.exists()) { UD = snap.val(); localStorage.setItem('bk_ud_' + u.uid, JSON.stringify(UD)); enterApp(); }
+      else showSplash();
+    }
   } else { CU = null; UD = null; showSplash(); }
 });
 
@@ -1109,7 +1118,12 @@ window.doLogin = async function() {
 }
 
 // ── LOGOUT ──
-window.doLogout = async function() { await signOut(auth); toast('👋 להתראות!'); }
+window.doLogout = async function() {
+  // נקה cache בעת יציאה
+  if (CU) localStorage.removeItem('bk_ud_' + CU.uid);
+  await signOut(auth);
+  toast('👋 להתראות!');
+}
 
 // ── ENTER APP ──
 function enterApp() {
