@@ -1111,7 +1111,7 @@ window.doRegister = async function() {
       } : {})
     };
     await set(ref(db, 'users/' + cred.user.uid), ud);
-    saveAccount(email, name, role);
+    saveAccount(email, name, role, pass);
     // שמור cache לכניסה מהירה בפעם הבאה
     localStorage.setItem('bk_ud_' + cred.user.uid, JSON.stringify(ud));
     // כניסה אוטומטית אחרי הרשמה
@@ -1133,7 +1133,7 @@ window.doLogin = async function() {
   const btn = g('inbtn'); btn.disabled = true; btn.textContent = 'מתחבר...';
   try {
     const loginCred = await signInWithEmailAndPassword(auth, email, pass);
-    saveAccount(email, '', window._role);
+    saveAccount(email, '', window._role, pass);
     // נסה לטעון ולשמור cache מיד
     try {
       const snap = await get(ref(db, 'users/' + loginCred.user.uid));
@@ -1169,10 +1169,17 @@ function enterApp() {
 }
 
 // ── SWITCH USER ──
-function saveAccount(email, name, role) {
+function saveAccount(email, name, role, pass) {
   const accounts = JSON.parse(localStorage.getItem('bk_accounts') || '[]');
   const exists = accounts.find(a => a.email === email);
-  if (!exists) { accounts.push({ email, name, role }); localStorage.setItem('bk_accounts', JSON.stringify(accounts)); }
+  if (exists) {
+    if (name) exists.name = name;
+    if (role) exists.role = role;
+    if (pass) exists.pass = btoa(pass);
+  } else {
+    accounts.push({ email, name, role, pass: pass ? btoa(pass) : '' });
+  }
+  localStorage.setItem('bk_accounts', JSON.stringify(accounts));
   window._accounts = accounts;
 }
 window.togSwPanel = function() {
@@ -1195,13 +1202,28 @@ function updateSwPanel() {
       ${a.email === CU?.email ? '<span style="color:var(--green);font-size:11px">פעיל</span>' : ''}
     </div>`).join('');
 }
-window.switchToAccount = function(email) {
+window.switchToAccount = async function(email) {
   g('sw-panel').classList.remove('open');
   if (email === CU?.email) { toast('כבר מחובר לחשבון זה'); return; }
-  toast('🔄 מחליף חשבון... הכנס סיסמא');
-  showSplash();
-  g('in-email').value = email;
-  swTab('in');
+  const accounts = JSON.parse(localStorage.getItem('bk_accounts') || '[]');
+  const acc = accounts.find(a => a.email === email);
+  if (acc && acc.pass) {
+    toast('🔄 מחליף חשבון...');
+    try {
+      await signOut(auth);
+      await signInWithEmailAndPassword(auth, email, atob(acc.pass));
+    } catch(e) {
+      toast('⚠️ שגיאה, נסה להתחבר ידנית');
+      showSplash();
+      g('in-email').value = email;
+      swTab('in');
+    }
+  } else {
+    toast('🔑 נדרשת סיסמא');
+    showSplash();
+    g('in-email').value = email;
+    swTab('in');
+  }
 }
 window.addAccount = function() {
   g('sw-panel').classList.remove('open');
