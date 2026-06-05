@@ -408,8 +408,8 @@ textarea.inp{resize:vertical;min-height:70px}
     <div style="font-size:22px;font-weight:700;margin-bottom:6px">ברוכים הבאים 👋</div>
     <div style="font-size:14px;color:var(--w50);margin-bottom:28px">בחרו את סוג המשתמש שלכם</div>
     <div class="role-grid">
-      <div class="rc" id="rc-client" onclick="selRole('client')"><div class="ri">👤</div><div class="rl">לקוח</div><div class="rs">קביעת תורים</div></div>
-      <div class="rc" id="rc-biz" onclick="selRole('business')"><div class="ri">🏪</div><div class="rl">בעל עסק</div><div class="rs">ניהול עסק</div></div>
+      <div class="rc" id="rc-client"><div class="ri">👤</div><div class="rl">לקוח</div><div class="rs">קביעת תורים</div></div>
+      <div class="rc" id="rc-biz"><div class="ri">🏪</div><div class="rl">בעל עסק</div><div class="rs">ניהול עסק</div></div>
     </div>
     <div class="atabs">
       <div class="atab active" id="tab-in" onclick="swTab('in')">כניסה</div>
@@ -1014,6 +1014,20 @@ let CU = null, UD = null;
 window._role = 'client';
 window._allAppts = [];
 window._accounts = JSON.parse(localStorage.getItem('bk_accounts') || '[]');
+
+// Role card listeners – מחוץ ל-onclick כדי שיעבדו עם type="module"
+document.getElementById('rc-client').addEventListener('click', () => {
+  window._role = 'client';
+  document.querySelectorAll('.rc').forEach(c => c.classList.remove('sel'));
+  document.getElementById('rc-client').classList.add('sel');
+  document.getElementById('biz-fields').classList.add('hidden');
+});
+document.getElementById('rc-biz').addEventListener('click', () => {
+  window._role = 'business';
+  document.querySelectorAll('.rc').forEach(c => c.classList.remove('sel'));
+  document.getElementById('rc-biz').classList.add('sel');
+  document.getElementById('biz-fields').classList.remove('hidden');
+});
 
 // ── AUTH STATE ──
 // הסתר מסך טעינה אחרי 2 שניות גם אם Firebase איטי
