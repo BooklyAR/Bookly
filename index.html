@@ -1016,6 +1016,15 @@ window._allAppts = [];
 window._accounts = JSON.parse(localStorage.getItem('bk_accounts') || '[]');
 
 // ── AUTH STATE ──
+// הסתר מסך טעינה אחרי 2 שניות גם אם Firebase איטי
+setTimeout(() => {
+  const ls = g('ls');
+  if (ls && ls.style.display !== 'none') {
+    ls.style.display = 'none';
+    if (!CU) showSplash();
+  }
+}, 2000);
+
 onAuthStateChanged(auth, async u => {
   g('ls').style.display = 'none';
   if (u) {
@@ -1057,9 +1066,12 @@ window.doRegister = async function() {
       } : {})
     };
     await set(ref(db, 'users/' + cred.user.uid), ud);
-    // Save account for switch
     saveAccount(email, name, role);
+    // כניסה אוטומטית אחרי הרשמה
+    CU = cred.user;
+    UD = ud;
     toast('✅ נרשמת בהצלחה! ברוך הבא 🎉');
+    setTimeout(() => enterApp(), 800);
   } catch(e) {
     btn.disabled = false; btn.textContent = 'הרשמה ←';
     if (e.code === 'auth/email-already-in-use') showErr('האימייל כבר קיים');
