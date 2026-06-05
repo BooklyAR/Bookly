@@ -463,7 +463,12 @@ textarea.inp{resize:vertical;min-height:70px}
 <div class="switch-panel" id="sw-panel">
   <div class="sp-title">החלף משתמש</div>
   <div id="sw-users-list"></div>
-  <div class="sp-add" id="sp-add-btn">+ הוסף חשבון</div>
+  <div id="sw-quick-login" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
+    <div style="font-size:12px;color:var(--w50);margin-bottom:6px" id="sw-login-label">סיסמא עבור:</div>
+    <input class="inp" id="sw-pass" type="password" placeholder="סיסמא" style="margin-bottom:6px;font-size:13px;padding:8px 12px"/>
+    <button class="btnp" id="sw-login-btn" style="font-size:13px;padding:8px">התחבר</button>
+  </div>
+  <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd);cursor:pointer;color:var(--pl);font-size:13px" id="sp-add-btn2">+ הוסף חשבון</div>
 </div>
 
 <!-- MAIN PAGE -->
@@ -1049,6 +1054,17 @@ document.getElementById('week-prev')?.addEventListener('click', () => {
 document.getElementById('week-next')?.addEventListener('click', () => {
   window._weekOffset++; renderWeekCal();
 });
+// Switch account buttons
+document.getElementById('sp-add-btn2')?.addEventListener('click', () => {
+  document.getElementById('sw-panel').classList.remove('open');
+  showSplash();
+  swTab('up');
+});
+document.getElementById('sw-login-btn')?.addEventListener('click', () => doQuickSwitch());
+document.getElementById('sw-pass')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doQuickSwitch();
+});
+// OLD sp-add-btn removed, keeping reference:
 document.getElementById('sp-add-btn')?.addEventListener('click', () => {
   document.getElementById('sw-panel').classList.remove('open');
   showSplash();
@@ -1223,60 +1239,77 @@ window.togSwPanel = function() {
 function updateSwPanel() {
   const list = g('sw-users-list'); if (!list) return;
   const accounts = JSON.parse(localStorage.getItem('bk_accounts') || '[]');
-  if (accounts.length === 0 && UD) {
-    // לא יוצרים חשבון בלי סיסמא - הסיסמא תישמר בכניסה הבאה
-    return;
-  }
-  list.innerHTML = accounts.map(a => `
-    <div class="sp-user ${a.email === CU?.email ? 'current' : ''}" data-email="${a.email}">
+  if (accounts.length === 0) return;
+  list.innerHTML = accounts.map(a => {
+    const isCurrent = a.email === (CU?.email || '');
+    const hasPass = a.pass && a.pass.length > 0;
+    return `<div class="sp-user ${isCurrent ? 'current' : ''}" data-sw-email="${a.email}" style="cursor:pointer">
       <div class="sp-av" style="background:${a.role==='business'?'var(--p2)':'var(--p)'}">${(a.name||a.email)[0].toUpperCase()}</div>
-      <div><div class="sp-name">${a.name||a.email}</div><div class="sp-role">${a.role==='business'?'בעל עסק':'לקוח'}</div></div>
-      ${a.email === CU?.email ? '<span style="color:var(--green);font-size:11px">פעיל</span>' : ''}
-    </div>`).join('');
-  // Event delegation for switch
-  list.querySelectorAll('.sp-user[data-email]').forEach(el => {
-    el.addEventListener('click', () => switchToAccount(el.dataset.email));
+      <div style="flex:1"><div class="sp-name">${a.name||a.email}</div><div class="sp-role">${a.role==='business'?'בעל עסק':'לקוח'}${hasPass?' · 🔓':''}${isCurrent?' · פעיל':''}</div></div>
+      ${isCurrent ? '<span style="color:var(--green);font-size:16px">✓</span>' : '<span style="color:var(--pl);font-size:12px">→</span>'}
+    </div>`;
+  }).join('');
+  // Add click listeners
+  list.querySelectorAll('[data-sw-email]').forEach(el => {
+    el.addEventListener('click', function() {
+      const email = this.getAttribute('data-sw-email');
+      doSwitchAccount(email);
+    });
   });
 }
-window.switchToAccount = async function(email) {
-  g('sw-panel').classList.remove('open');
-  if (email === CU?.email) { toast('כבר מחובר לחשבון זה'); return; }
+// ═══ מנגנון החלפת חשבון חדש ═══
+window._switchEmail = '';
+
+async function doSwitchAccount(email) {
+  if (email === (CU?.email || '')) {
+    toast('כבר מחובר לחשבון זה');
+    g('sw-panel').classList.remove('open');
+    return;
+  }
   const accounts = JSON.parse(localStorage.getItem('bk_accounts') || '[]');
   const acc = accounts.find(a => a.email === email);
-  if (acc && acc.pass) {
-    toast('🔄 מחליף חשבון...');
+
+  if (acc && acc.pass && acc.pass.length > 2) {
+    // יש סיסמא שמורה – החלפה מיידית!
+    g('sw-panel').classList.remove('open');
+    toast('🔄 מחליף...');
     try {
-      await signOut(auth);
       await signInWithEmailAndPassword(auth, email, atob(acc.pass));
+      toast('✅ מחובר!');
     } catch(e) {
-      toast('⚠️ שגיאה, נסה להתחבר ידנית');
-      showSplash();
-      g('in-email').value = email;
-      swTab('in');
+      // סיסמא ישנה/שגויה – בקש חדשה
+      window._switchEmail = email;
+      g('sw-quick-login').style.display = 'block';
+      g('sw-login-label').textContent = 'סיסמא עבור ' + email + ':';
+      g('sw-pass').value = '';
+      g('sw-pass').focus();
     }
   } else {
-    // בקש סיסמא פעם אחת ושמור לפעמים הבאות
-    const pw = prompt('הכנס סיסמא עבור ' + email + '\n(פעם אחת בלבד, אחר כך יזכור)');
-    if (pw) {
-      toast('🔄 מתחבר...');
-      try {
-        await signOut(auth);
-        await signInWithEmailAndPassword(auth, email, pw);
-        saveAccount(email, acc?.name || '', acc?.role || 'client', pw);
-        toast('✅ מחובר! בפעם הבאה לא תצטרך סיסמא');
-      } catch(e) {
-        toast('⚠️ סיסמא שגויה');
-        showSplash();
-        g('in-email').value = email;
-        swTab('in');
-      }
-    }
+    // אין סיסמא – הצג שדה סיסמא בפאנל
+    window._switchEmail = email;
+    g('sw-quick-login').style.display = 'block';
+    g('sw-login-label').textContent = 'סיסמא עבור ' + email + ':';
+    g('sw-pass').value = '';
+    g('sw-pass').focus();
   }
 }
-window.addAccount = function() {
-  g('sw-panel').classList.remove('open');
-  showSplash();
-  swTab('up');
+
+async function doQuickSwitch() {
+  const email = window._switchEmail;
+  const pass = g('sw-pass').value;
+  if (!email || !pass) { toast('⚠️ הכנס סיסמא'); return; }
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+    // שמור סיסמא כדי שבפעם הבאה לא יבקש
+    saveAccount(email, '', '', pass);
+    g('sw-panel').classList.remove('open');
+    g('sw-quick-login').style.display = 'none';
+    toast('✅ מחובר! בפעם הבאה – בלי סיסמא');
+  } catch(e) {
+    toast('⚠️ סיסמא שגויה');
+    g('sw-pass').value = '';
+    g('sw-pass').focus();
+  }
 }
 
 // ── LOAD BIZ GRID ──
