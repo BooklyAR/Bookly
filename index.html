@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookly – קביעת תורים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0a0a0f;
+  --black2: #111118;
+  --black3: #18181f;
+  --black4: #1e1e28;
+  --purple: #7c3aed;
+  --purple2: #9333ea;
+  --purple3: #a855f7;
+  --purple-light: #c084fc;
+  --purple-glow: rgba(124,58,237,0.35);
+  --purple-subtle: rgba(124,58,237,0.12);
+  --white: #ffffff;
+  --white80: rgba(255,255,255,0.8);
+  --white50: rgba(255,255,255,0.5);
+  --white20: rgba(255,255,255,0.2);
+  --white10: rgba(255,255,255,0.1);
+  --white05: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(124,58,237,0.3);
+  --green: #10b981;
+  --red: #ef4444;
+  --amber: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Heebo', sans-serif;
+  background: var(--black);
+  color: var(--white);
+  direction: rtl;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--black2); }
+::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
+
+/* UTILS */
+.hidden { display: none !important; }
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+
+/* ===================== SPLASH ===================== */
+#splash {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--black);
+}
+.splash-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,58,237,0.25) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 80% 80%, rgba(147,51,234,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 30% at 20% 70%, rgba(168,85,247,0.1) 0%, transparent 60%);
+}
+.splash-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+.splash-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  animation: float 6s ease-in-out infinite;
+}
+.orb1 { width: 300px; height: 300px; background: rgba(124,58,237,0.2); top: -100px; right: -80px; }
+.orb2 { width: 200px; height: 200px; background: rgba(147,51,234,0.15); bottom: 50px; left: -60px; animation-delay: -3s; }
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+.splash-logo {
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+.splash-logo .dot { color: var(--purple3); }
+.splash-logo-glow {
+  position: absolute;
+  bottom: -10px; left: 50%;
+  transform: translateX(-50%);
+  width: 120px; height: 20px;
+  background: var(--purple-glow);
+  filter: blur(15px);
+  border-radius: 50%;
+}
+.splash-tagline {
+  font-size: 16px;
+  color: var(--white50);
+  margin-bottom: 50px;
+  font-weight: 300;
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 1;
+}
+.splash-card {
+  background: var(--black2);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 36px;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 60px rgba(124,58,237,0.1);
+}
+.splash-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(124,58,237,0.4), transparent 50%, rgba(147,51,234,0.2));
+  z-index: -1;
+}
+.splash-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.splash-sub { font-size: 14px; color: var(--white50); margin-bottom: 28px; }
+
+.role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+.role-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  background: var(--white05);
+}
+.role-card:hover { border-color: var(--purple); background: var(--purple-subtle); }
+.role-card.selected { border-color: var(--purple); background: var(--purple-subtle); box-shadow: 0 0 20px var(--purple-glow); }
+.role-icon { font-size: 28px; margin-bottom: 6px; }
+.role-label { font-size: 14px; font-weight: 600; }
+.role-sub { font-size: 12px; color: var(--white50); margin-top: 2px; }
+
+.auth-tabs { display: flex; gap: 0; margin-bottom: 20px; background: var(--white05); border-radius: 10px; padding: 3px; }
+.auth-tab {
+  flex: 1; padding: 9px; text-align: center; font-size: 14px; font-weight: 500;
+  cursor: pointer; border-radius: 8px; transition: all 0.2s; color: var(--white50);
+}
+.auth-tab.active { background: var(--purple); color: var(--white); }
+
+.inp {
+  width: 100%; padding: 12px 16px;
+  background: var(--white05);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--white);
+  font-size: 14px;
+  font-family: 'Heebo', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 10px;
+  direction: rtl;
+}
+.inp:focus { border-color: var(--purple); background: var(--purple-subtle); }
+.inp::placeholder { color: var(--white50); }
+.inp-label { font-size: 12px; color: var(--white50); margin-bottom: 5px; display: block; }
+
+select.inp option { background: #1a1a2e; color: var(--white); }
+
+.btn-purple {
+  width: 100%; padding: 13px;
+  background: var(--purple);
+  border: none;
+  border-radius: 10px;
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Heebo', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+.btn-purple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(255,255,255,0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.btn-purple:hover { background: var(--purple2); box-shadow: 0 0 30px var(--purple-glow); }
+.btn-purple:hover::after { opacity: 1; }
+.btn-purple:active { transform: scale(0.98); }
+
+/* ===================== NAVBAR ===================== */
+.navbar {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(10,10,15,0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-logo { font-size: 22px; font-weight: 900; cursor: pointer; letter-spacing: -1px; }
+.nav-logo span { color: var(--purple3); }
+.nav-center { display: flex; gap: 4px; }
+.nav-link {
+  padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  cursor: pointer; color: var(--white50); border: none; background: none;
+  transition: all 0.15s; font-family: 'Heebo', sans-serif;
+}
+.nav-link:hover { color: var(--white); background: var(--white05); }
+.nav-link.active { color: var(--white); background: var(--purple-subtle); }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.nav-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--purple);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  border: 1px solid var(--purple3);
+}
+.nav-role-badge {
+  font-size: 11px; padding: 3px 10px; border-radius: 999px;
+  background: var(--purple-subtle); color: var(--purple-light);
+  border: 1px solid var(--border2);
+}
+
+/* ===================== MAIN PAGE ===================== */
+#main-page { background: var(--black); }
+.hero-section {
+  padding: 60px 24px 40px;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+}
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 300px;
+  background: radial-gradient(ellipse, rgba(124,58,237,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-title {
+  font-size: 44px; font-weight: 900; line-height: 1.15;
+  margin-bottom: 14px; letter-spacing: -1.5px;
+}
+.hero-title .highlight { color: var(--purple3); }
+.hero-sub { font-size: 17px; color: var(--white50); margin-bottom: 30px; font-weight: 300; }
+.hero-search-bar {
+  display: flex; gap: 8px; max-width: 520px; margin: 0 auto 24px;
+  background: var(--black2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 6px;
+}
+.hero-search-bar input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--white); font-size: 15px; font-family: 'Heebo', sans-serif;
+  padding: 8px 12px; direction: rtl;
+}
+.hero-search-bar input::placeholder { color: var(--white50); }
+.hero-search-bar button {
+  background: var(--purple); border: none; border-radius: 10px;
+  color: var(--white); padding: 10px 22px; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: 'Heebo', sans-serif; transition: all 0.2s;
+}
+.hero-search-bar button:hover { background: var(--purple2); }
+
+.cats-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 50px; }
+.cat-chip {
+  padding: 7px 16px; border-radius: 999px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--border); background: var(--white05);
+  cursor: pointer; transition: all 0.2s; color: var(--white80);
+}
+.cat-chip:hover, .cat-chip.active { border-color: var(--purple); background: var(--purple-subtle); color: var(--purple-light); }
+
+.section-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 24px; margin-bottom: 16px; max-width: 900px; margin-left: auto; margin-right: auto;
+}
+.section-title { font-size: 18px; font-weight: 700; }
+.section-link { font-size: 13px; color: var(--purple3); cursor: pointer; }
+
+.biz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; padding: 0 24px; max-width: 900px; margin: 0 auto 40px; }
+.biz-card {
+  background: var(--black2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.biz-card:hover { border-color: var(--purple); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(124,58,237,0.2); }
+.biz-cover { height: 90px; display: flex; align-items: center; justify-content: center; font-size: 32px; position: relative; }
+.biz-cover-verified { position: absolute; top: 8px; left: 8px; background: var(--green); width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.biz-body { padding: 12px; }
+.biz-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.biz-cat { font-size: 12px; color: var(--white50); margin-bottom: 8px; }
+.biz-footer { display: flex; justify-content: space-between; align-items: center; }
+.biz-stars { font-size: 12px; color: var(--amber); }
+.biz-book-btn {
+  font-size: 12px; padding: 5px 12px; background: var(--purple-subtle);
+  border: 1px solid var(--border2); border-radius: 6px; color: var(--purple-light);
+  cursor: pointer; font-weight: 600; font-family: 'Heebo', sans-serif; transition: all 0.2s;
+}
+.biz-book-btn:hover { background: var(--purple); color: var(--white); }
+
+/* ===================== BIZ PROFILE ===================== */
+#biz-profile { background: var(--black); }
+.profile-cover { height: 180px; position: relative; overflow: hidden; }
+.profile-cover-bg { width: 100%; height: 100%; object-fit: cover; }
+.profile-cover-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, var(--black) 100%); }
+.profile-avatar-wrap { position: absolute; bottom: -36px; right: 24px; }
+.profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 32px; border: 3px solid var(--black); }
+.profile-info { padding: 50px 24px 20px; }
+.profile-name { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+.profile-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--white50); margin-bottom: 14px; }
+.profile-meta span { display: flex; align-items: center; gap: 4px; }
+.profile-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+.btn-sm {
+  padding: 9px 18px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; font-family: 'Heebo', sans-serif;
+  border: 1px solid var(--border);
+}
+.btn-sm-primary { background: var(--purple); border-color: var(--purple); color: var(--white); }
+.btn-sm-primary:hover { background: var(--purple2); box-shadow: 0 0 20px var(--purple-glow); }
+.btn-sm-outline { background: transparent; color: var(--white80); }
+.btn-sm-outline:hover { background: var(--white05); }
+
+/* STORIES */
+.stories-section { padding: 0 24px 24px; }
+.stories-row { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 6px; }
+.story-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+.story-ring {
+  width: 58px; height: 58px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--purple3));
+  padding: 2.5px; transition: transform 0.2s;
+}
+.story-ring:hover { transform: scale(1.05); }
+.story-inner { width: 100%; height: 100%; border-radius: 50%; background: var(--black2); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.story-lbl { font-size: 11px; color: var(--white50); max-width: 60px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* FEED */
+.feed-section { padding: 0 24px; max-width: 620px; margin: 0 auto; }
+.feed-post {
+  background: var(--black2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.post-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; }
+.post-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.post-biz { font-size: 14px; font-weight: 600; }
+.post-time { font-size: 12px; color: var(--white50); }
+.post-media { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; font-size: 60px; background: var(--black3); }
+.post-body { padding: 14px 16px; }
+.post-text { font-size: 14px; color: var(--white80); line-height: 1.6; margin-bottom: 12px; }
+.post-actions { display: flex; gap: 16px; padding-top: 10px; border-top: 1px solid var(--border); }
+.post-action-btn {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 13px; color: var(--white50); cursor: pointer;
+  background: none; border: none; font-family: 'Heebo', sans-serif;
+  transition: color 0.15s; padding: 0;
+}
+.post-action-btn:hover { color: var(--white); }
+.post-action-btn.liked { color: #f43f5e; }
+.post-comments { padding: 0 16px 14px; }
+.comment { display: flex; gap: 8px; margin-bottom: 8px; }
+.comment-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--black4); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; border: 1px solid var(--border); }
+.comment-text { background: var(--black3); border-radius: 10px; padding: 7px 10px; font-size: 13px; flex: 1; }
+.comment-name { font-weight: 600; font-size: 12px; margin-bottom: 2px; color: var(--purple-light); }
+.comment-inp-row { display: flex; gap: 8px; margin-top: 8px; }
+.comment-inp { flex: 1; background: var(--black3); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--white); font-family: 'Heebo', sans-serif; outline: none; direction: rtl; }
+.comment-inp:focus { border-color: var(--purple); }
+.comment-send { background: var(--purple); border: none; border-radius: 8px; color: var(--white); padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: 'Heebo', sans-serif; }
+
+/* ===================== BOOKING ===================== */
+#booking-page { background: var(--black); padding: 24px; }
+.booking-wrap { max-width: 700px; margin: 0 auto; }
+.page-title { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+.page-sub { font-size: 14px; color: var(--white50); margin-bottom: 24px; }
+.booking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.booking-card { background: var(--black2); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+.booking-card-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; color: var(--white80); }
+.mini-cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.mini-cal-head span { font-size: 14px; font-weight: 600; }
+.cal-nav { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--white50); padding: 4px 8px; cursor: pointer; font-size: 12px; transition: all 0.15s; }
+.cal-nav:hover { border-color: var(--purple); color: var(--white); }
+.cal-days-head { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; font-size: 11px; color: var(--white50); margin-bottom: 4px; }
+.cal-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.cal-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; color: var(--white80);
+}
+.cal-day:hover:not(.disabled):not(.today) { background: var(--purple-subtle); color: var(--purple-light); }
+.cal-day.today { background: var(--purple); color: var(--white); font-weight: 700; }
+.cal-day.selected { background: var(--purple); color: var(--white); }
+.cal-day.has-appt { color: var(--purple3); font-weight: 600; }
+.cal-day.disabled { color: rgba(255,255,255,0.2); cursor: default; }
+
+.time-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
+.time-slot {
+  padding: 10px 4px; text-align: center; border-radius: 8px;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--border); background: var(--white05);
+  transition: all 0.15s; color: var(--white80);
+}
+.time-slot:hover:not(.busy) { border-color: var(--purple); color: var(--purple-light); background: var(--purple-subtle); }
+.time-slot.selected { background: var(--purple); border-color: var(--purple); color: var(--white); }
+.time-slot.busy { color: rgba(255,255,255,0.2); text-decoration: line-through; cursor: default; border-color: transparent; }
+
+.booking-confirm {
+  margin-top: 20px; background: var(--black2); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 20px;
+}
+.confirm-row { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.confirm-row:last-of-type { border-bottom: none; }
+.confirm-key { color: var(--white50); }
+
+/* ===================== DASHBOARD ===================== */
+#dashboard-page { background: var(--black); }
+.dash-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 60px); }
+.dash-sidebar {
+  background: var(--black2);
+  border-left: 1px solid var(--border);
+  padding: 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: all 0.15s; color: var(--white50);
+}
+.sidebar-item:hover { background: var(--white05); color: var(--white); }
+.sidebar-item.active { background: var(--purple-subtle); color: var(--purple-light); border: 1px solid var(--border2); }
+.sidebar-item .si-icon { font-size: 18px; }
+.dash-content { padding: 24px; overflow-y: auto; }
+.dash-section { display: none; }
+.dash-section.active { display: block; }
+
+/* STAT CARDS */
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card { background: var(--black2); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+.stat-label { font-size: 12px; color: var(--white50); margin-bottom: 8px; }
+.stat-val { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+.stat-sub { font-size: 12px; }
+.stat-green { color: var(--green); }
+.stat-red { color: var(--red); }
+.stat-purple { color: var(--purple3); }
+
+/* TABLE */
+.data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.data-table th { text-align: right; padding: 12px 14px; font-size: 12px; color: var(--white50); font-weight: 600; border-bottom: 1px solid var(--border); }
+.data-table td { padding: 13px 14px; border-bottom: 1px solid var(--border); color: var(--white80); }
+.data-table tr:hover td { background: var(--white05); }
+.data-table tr:last-child td { border-bottom: none; }
+
+.status-badge {
+  display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+}
+.badge-confirmed { background: rgba(16,185,129,0.15); color: var(--green); }
+.badge-pending { background: rgba(245,158,11,0.15); color: var(--amber); }
+.badge-cancelled { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-completed { background: rgba(124,58,237,0.15); color: var(--purple3); }
+.badge-blocked { background: rgba(239,68,68,0.15); color: var(--red); }
+
+.action-btn {
+  padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--border); background: var(--white05);
+  color: var(--white80); font-family: 'Heebo', sans-serif; transition: all 0.15s; margin-left: 4px;
+}
+.action-btn:hover { border-color: var(--purple); color: var(--purple-light); }
+.action-btn.danger { border-color: rgba(239,68,68,0.3); color: var(--red); }
+.action-btn.danger:hover { background: rgba(239,68,68,0.1); }
+
+.card-box { background: var(--black2); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
+.card-box-header { padding: 16px 20px; background: var(--black3); border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+.card-box-body { padding: 20px; }
+
+/* WEEK CALENDAR */
+.week-cal { overflow-x: auto; }
+.week-grid { display: grid; grid-template-columns: 54px repeat(6,1fr); min-width: 600px; }
+.week-head-cell { padding: 8px; text-align: center; font-size: 12px; color: var(--white50); font-weight: 600; border-bottom: 1px solid var(--border); background: var(--black3); }
+.week-time { padding: 6px 8px; font-size: 11px; color: rgba(255,255,255,0.3); text-align: left; border-bottom: 1px solid var(--border); }
+.week-cell { border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); min-height: 46px; padding: 2px; position: relative; }
+.week-cell.today-col { background: rgba(124,58,237,0.04); }
+.appt-pill { border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 600; cursor: pointer; margin: 1px 0; }
+.appt-confirmed { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+.appt-pending { background: rgba(245,158,11,0.2); color: #fcd34d; }
+.appt-cancelled { background: rgba(239,68,68,0.2); color: #fca5a5; }
+
+/* SETTINGS */
+.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.settings-row { display: grid; grid-template-columns: 80px 1fr 1fr 40px; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--white80); }
+.settings-row:last-child { border-bottom: none; }
+
+/* TOGGLE */
+.toggle { position: relative; display: inline-block; width: 34px; height: 18px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--black4); border-radius: 18px; cursor: pointer; transition: 0.3s; border: 1px solid var(--border); }
+.toggle-slider:before { content: ''; position: absolute; width: 12px; height: 12px; border-radius: 50%; background: var(--white50); bottom: 2px; right: 2px; transition: 0.3s; }
+.toggle input:checked + .toggle-slider { background: var(--purple); border-color: var(--purple); }
+.toggle input:checked + .toggle-slider:before { background: var(--white); transform: translateX(-16px); }
+
+/* CLIENT DASH */
+#client-page { background: var(--black); padding: 24px; }
+.client-wrap { max-width: 700px; margin: 0 auto; }
+.upcoming-card { background: var(--black2); border: 1px solid var(--border2); border-radius: 16px; padding: 18px 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.upcoming-biz { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.upcoming-info { font-size: 13px; color: var(--white50); }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+  display: none; align-items: center; justify-content: center; z-index: 999;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--black2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+.modal::before {
+  content: '';
+  position: absolute; inset: -1px; border-radius: 20px;
+  background: linear-gradient(135deg, rgba(124,58,237,0.3), transparent 60%);
+  z-index: -1;
+}
+.modal-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; }
+.modal-close {
+  position: absolute; top: 16px; left: 16px;
+  background: var(--white10); border: none; border-radius: 50%;
+  width: 30px; height: 30px; color: var(--white); font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.15s;
+}
+.modal-close:hover { background: var(--white20); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--black2); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 14px 24px; font-size: 14px; font-weight: 600;
+  color: var(--white); z-index: 9999;
+  box-shadow: 0 8px 32px rgba(124,58,237,0.3);
+  display: none; white-space: nowrap;
+}
+.toast.show { display: block; animation: toastIn 0.3s ease; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* BREAK SLOTS */
+.break-item { display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
+.break-remove { background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; margin-right: auto; }
+
+/* CTA BANNER */
+.cta-banner {
+  margin: 40px 24px; padding: 28px 32px;
+  background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(147,51,234,0.1));
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  max-width: 852px; margin-left: auto; margin-right: auto;
+}
+.cta-text h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+.cta-text p { font-size: 14px; color: var(--white50); }
+.btn-cta {
+  padding: 13px 28px; background: var(--purple); border: none; border-radius: 12px;
+  color: var(--white); font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: 'Heebo', sans-serif; transition: all 0.2s; white-space: nowrap;
+}
+.btn-cta:hover { background: var(--purple2); box-shadow: 0 0 30px var(--purple-glow); }
+
+/* Feed upload */
+.upload-area {
+  border: 2px dashed var(--border2); border-radius: 12px; padding: 24px;
+  text-align: center; cursor: pointer; transition: all 0.2s; color: var(--white50); font-size: 14px;
+  background: var(--purple-subtle);
+}
+.upload-area:hover { border-color: var(--purple3); color: var(--white); }
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 640px) {
+  .booking-grid, .settings-grid, .stats-row { grid-template-columns: 1fr; }
+  .dash-layout { grid-template-columns: 1fr; }
+  .dash-sidebar { flex-direction: row; overflow-x: auto; padding: 10px; }
+  .hero-title { font-size: 28px; }
+  .cta-banner { flex-direction: column; gap: 16px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== SPLASH ========== -->
+<div id="splash">
+  <div class="splash-bg"></div>
+  <div class="splash-grid"></div>
+  <div class="splash-orb orb1"></div>
+  <div class="splash-orb orb2"></div>
+
+  <div style="position:relative;z-index:1;text-align:center;margin-bottom:40px">
+    <div class="splash-logo">
+      Bookly<span class="dot">.</span>
+      <div class="splash-logo-glow"></div>
+    </div>
+    <div class="splash-tagline">מערכת ניהול תורים חכמה לעסקים ישראליים</div>
+  </div>
+
+  <div class="splash-card">
+    <div class="splash-title">ברוכים הבאים 👋</div>
+    <div class="splash-sub">בחרו את סוג המשתמש שלכם כדי להמשיך</div>
+
+    <div class="role-grid" id="role-grid">
+      <div class="role-card" id="role-client" onclick="selectRole('client')">
+        <div class="role-icon">👤</div>
+        <div class="role-label">לקוח</div>
+        <div class="role-sub">קביעת תורים</div>
+      </div>
+      <div class="role-card" id="role-business" onclick="selectRole('business')">
+        <div class="role-icon">🏪</div>
+        <div class="role-label">בעל עסק</div>
+        <div class="role-sub">ניהול תורים</div>
+      </div>
+    </div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchAuth('login')">כניסה</div>
+      <div class="auth-tab" id="tab-register" onclick="switchAuth('register')">הרשמה</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="auth-login">
+      <label class="inp-label">אימייל / טלפון</label>
+      <input class="inp" placeholder="mail@example.com" />
+      <label class="inp-label">סיסמא</label>
+      <input class="inp" type="password" placeholder="••••••••" />
+      <button class="btn-purple" style="margin-top:6px" onclick="doLogin()">כניסה ←</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="auth-register" class="hidden">
+      <label class="inp-label">שם מלא *</label>
+      <input class="inp" id="reg-name" placeholder="ישראל ישראלי" />
+      <label class="inp-label">מספר טלפון *</label>
+      <input class="inp" id="reg-phone" placeholder="05X-XXXXXXX" />
+      <label class="inp-label">אימייל</label>
+      <input class="inp" id="reg-email" placeholder="mail@example.com" />
+      <label class="inp-label">סיסמא *</label>
+      <input class="inp" type="password" id="reg-pass" placeholder="לפחות 8 תווים" />
+      <div id="biz-reg-fields" class="hidden">
+        <label class="inp-label">שם העסק *</label>
+        <input class="inp" id="reg-bizname" placeholder="ספרות דוד" />
+        <label class="inp-label">כתובת העסק *</label>
+        <input class="inp" id="reg-addr" placeholder="רחוב, עיר" />
+        <label class="inp-label">מקצוע *</label>
+        <select class="inp" id="reg-prof">
+          <option value="">בחרו מקצוע...</option>
+          <option>ספר</option>
+          <option>קוסמטיקאית</option>
+          <option>ספרות נשים</option>
+          <option>מסאז'</option>
+          <option>ציפורניים</option>
+          <option>אחר</option>
+        </select>
+      </div>
+      <button class="btn-purple" style="margin-top:6px" onclick="doRegister()">הרשמה ←</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MAIN PAGE ========== -->
+<div class="page" id="main-page">
+  <nav class="navbar">
+    <div class="nav-logo" onclick="showPage('main-page')">Bookly<span>.</span></div>
+    <div class="nav-center">
+      <button class="nav-link active" onclick="showPage('main-page')">🏠 ראשי</button>
+      <button class="nav-link" onclick="showPage('biz-profile')">🏪 עמוד עסק</button>
+      <button class="nav-link" id="dash-nav-btn" onclick="goDash()">⚙️ דשבורד</button>
+      <button class="nav-link" id="client-nav-btn" onclick="showPage('client-page')">👤 התורים שלי</button>
+    </div>
+    <div class="nav-right">
+      <span class="nav-role-badge" id="nav-role-badge">לקוח</span>
+      <div class="nav-avatar" id="nav-avatar">י</div>
+      <button class="btn-sm btn-sm-outline" style="font-size:13px;padding:7px 14px" onclick="logout()">יציאה</button>
+    </div>
+  </nav>
+
+  <section class="hero-section">
+    <div class="hero-title">קבעו תורים ב<span class="highlight">שניות</span></div>
+    <div class="hero-sub">הפלטפורמה המובילה לניהול תורים לעסקים ישראליים</div>
+    <div class="hero-search-bar">
+      <input placeholder="חפשו ספר, קוסמטיקאית, מסאז'..." />
+      <button>🔍 חיפוש</button>
+    </div>
+    <div class="cats-row">
+      <div class="cat-chip active" onclick="filterCat(this,'הכל')">✨ הכל</div>
+      <div class="cat-chip" onclick="filterCat(this,'ספרים')">✂️ ספרים</div>
+      <div class="cat-chip" onclick="filterCat(this,'קוסמטיקה')">💅 קוסמטיקה</div>
+      <div class="cat-chip" onclick="filterCat(this,'נשים')">👩‍🦱 ספרות נשים</div>
+      <div class="cat-chip" onclick="filterCat(this,'מסאז')">💆 מסאז'</div>
+      <div class="cat-chip" onclick="filterCat(this,'ציפורניים')">💄 ציפורניים</div>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <div class="section-title">עסקים מומלצים</div>
+    <div class="section-link">הצג הכל ←</div>
+  </div>
+
+  <div class="biz-grid">
+    <div class="biz-card" onclick="showPage('biz-profile')">
+      <div class="biz-cover" style="background:linear-gradient(135deg,#1e1b4b,#312e81)">
+        ✂️
+        <div class="biz-cover-verified">✓</div>
+      </div>
+      <div class="biz-body">
+        <div class="biz-name">ספרות דוד</div>
+        <div class="biz-cat">✂️ ספר · תל אביב</div>
+        <div class="biz-footer">
+          <span class="biz-stars">★ 4.9 (127)</span>
+          <button class="biz-book-btn" onclick="event.stopPropagation();showPage('booking-page')">קבע תור</button>
+        </div>
+      </div>
+    </div>
+    <div class="biz-card" onclick="showPage('biz-profile')">
+      <div class="biz-cover" style="background:linear-gradient(135deg,#1a1a2e,#4a1942)">
+        💅
+        <div class="biz-cover-verified">✓</div>
+      </div>
+      <div class="biz-body">
+        <div class="biz-name">גלית ביוטי</div>
+        <div class="biz-cat">💅 קוסמטיקאית · רמת גן</div>
+        <div class="biz-footer">
+          <span class="biz-stars">★ 4.8 (94)</span>
+          <button class="biz-book-btn" onclick="event.stopPropagation();showPage('booking-page')">קבע תור</button>
+        </div>
+      </div>
+    </div>
+    <div class="biz-card" onclick="showPage('biz-profile')">
+      <div class="biz-cover" style="background:linear-gradient(135deg,#1e1b4b,#1e3a5f)">
+        💆
+      </div>
+      <div class="biz-body">
+        <div class="biz-name">ספא מרגוע</div>
+        <div class="biz-cat">💆 מסאז' · הרצליה</div>
+        <div class="biz-footer">
+          <span class="biz-stars">★ 5.0 (58)</span>
+          <button class="biz-book-btn" onclick="event.stopPropagation();showPage('booking-page')">קבע תור</button>
+        </div>
+      </div>
+    </div>
+    <div class="biz-card" onclick="showPage('biz-profile')">
+      <div class="biz-cover" style="background:linear-gradient(135deg,#2d1b4e,#4c1d95)">
+        👩‍🦱
+      </div>
+      <div class="biz-body">
+        <div class="biz-name">מספרה נשים</div>
+        <div class="biz-cat">👩‍🦱 ספרות נשים · פ"ת</div>
+        <div class="biz-footer">
+          <span class="biz-stars">★ 4.7 (83)</span>
+          <button class="biz-book-btn" onclick="event.stopPropagation();showPage('booking-page')">קבע תור</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-banner">
+    <div class="cta-text">
+      <h2>יש לכם עסק? הצטרפו ל-Bookly</h2>
+      <p>14 יום ניסיון חינם · ניהול תורים · מעקב לקוחות · ללא כרטיס אשראי</p>
+    </div>
+    <button class="btn-cta" onclick="logout()">התחילו עכשיו ←</button>
+  </div>
+</div>
+
+<!-- ========== BIZ PROFILE ========== -->
+<div class="page" id="biz-profile">
+  <nav class="navbar">
+    <div class="nav-logo" onclick="showPage('main-page')">Bookly<span>.</span></div>
+    <div class="nav-center">
+      <button class="nav-link" onclick="showPage('main-page')">← חזרה</button>
+    </div>
+    <div class="nav-right">
+      <span class="nav-role-badge" id="nav-role-badge2">לקוח</span>
+      <div class="nav-avatar">י</div>
+    </div>
+  </nav>
+
+  <div class="profile-cover" style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%)">
+    <div class="profile-cover-overlay"></div>
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar">✂️</div>
+    </div>
+  </div>
+
+  <div class="profile-info">
+    <div class="profile-name">ספרות דוד</div>
+    <div class="profile-meta">
+      <span>✂️ ספר</span>
+      <span>📍 דיזנגוף 120, תל אביב</span>
+      <span>📞 050-1234567</span>
+      <span>★ 4.9 · 127 ביקורים</span>
+      <span style="color:var(--green)">✓ מאומת</span>
+    </div>
+    <div class="profile-actions">
+      <button class="btn-sm btn-sm-primary" onclick="showPage('booking-page')">📅 קבע תור</button>
+      <button class="btn-sm btn-sm-outline" onclick="toggleFollow(this)">🤍 עקוב</button>
+      <button class="btn-sm btn-sm-outline">📤 שתף</button>
+    </div>
+  </div>
+
+  <div class="stories-section">
+    <div style="font-size:13px;color:var(--white50);margin-bottom:10px">סטוריז</div>
+    <div class="stories-row">
+      <div class="story-wrap">
+        <div class="story-ring"><div class="story-inner">✂️</div></div>
+        <div class="story-lbl">היום</div>
+      </div>
+      <div class="story-wrap">
+        <div class="story-ring"><div class="story-inner">🪒</div></div>
+        <div class="story-lbl">תספורת</div>
+      </div>
+      <div class="story-wrap">
+        <div class="story-ring" style="background:linear-gradient(135deg,var(--green),var(--purple))"><div class="story-inner">🏆</div></div>
+        <div class="story-lbl">פרס</div>
+      </div>
+      <div class="story-wrap">
+        <div class="story-ring" style="background:linear-gradient(135deg,var(--amber),var(--purple2))"><div class="story-inner">🎉</div></div>
+        <div class="story-lbl">מבצע</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:0 24px 16px;font-size:15px;font-weight:700">פיד העסק</div>
+  <div class="feed-section">
+    <div class="feed-post">
+      <div class="post-header">
+        <div class="post-avatar">ד</div>
+        <div>
+          <div class="post-biz">ספרות דוד</div>
+          <div class="post-time">לפני שעה</div>
+        </div>
+      </div>
+      <div class="post-media">✂️</div>
+      <div class="post-body">
+        <div class="post-text">תספורת חדשה ומדהימה לאחד הלקוחות הקבועים שלנו! תורים פתוחים לשבוע הבא 📅</div>
+        <div class="post-actions">
+          <button class="post-action-btn" id="like-btn-1" onclick="toggleLike(this,'like-count-1')">🤍 <span id="like-count-1">23</span> לייקים</button>
+          <button class="post-action-btn" onclick="toggleComments('comments-1')">💬 5 תגובות</button>
+        </div>
+      </div>
+      <div class="post-comments" id="comments-1" style="display:none">
+        <div class="comment">
+          <div class="comment-avatar">י</div>
+          <div class="comment-text"><div class="comment-name">יוסי כהן</div>נראה מדהים! 🔥</div>
+        </div>
+        <div class="comment">
+          <div class="comment-avatar">מ</div>
+          <div class="comment-text"><div class="comment-name">משה לוי</div>אני קובע תור בהקדם</div>
+        </div>
+        <div class="comment-inp-row">
+          <input class="comment-inp" placeholder="הוסיפו תגובה..." id="comment-inp-1" />
+          <button class="comment-send" onclick="addComment('comments-1','comment-inp-1')">שלח</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="feed-post">
+      <div class="post-header">
+        <div class="post-avatar">ד</div>
+        <div>
+          <div class="post-biz">ספרות דוד</div>
+          <div class="post-time">אתמול</div>
+        </div>
+      </div>
+      <div class="post-media">🪒</div>
+      <div class="post-body">
+        <div class="post-text">מבצע מיוחד לחודש יוני! תספורת + עיצוב זקן ב-₪80 בלבד 🎉</div>
+        <div class="post-actions">
+          <button class="post-action-btn" id="like-btn-2" onclick="toggleLike(this,'like-count-2')">🤍 <span id="like-count-2">41</span> לייקים</button>
+          <button class="post-action-btn" onclick="toggleComments('comments-2')">💬 8 תגובות</button>
+        </div>
+      </div>
+      <div class="post-comments" id="comments-2" style="display:none">
+        <div class="comment-inp-row">
+          <input class="comment-inp" placeholder="הוסיפו תגובה..." id="comment-inp-2" />
+          <button class="comment-send" onclick="addComment('comments-2','comment-inp-2')">שלח</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== BOOKING ========== -->
+<div class="page" id="booking-page">
+  <nav class="navbar">
+    <div class="nav-logo" onclick="showPage('main-page')">Bookly<span>.</span></div>
+    <div class="nav-center"><button class="nav-link" onclick="showPage('biz-profile')">← חזרה לפרופיל</button></div>
+    <div class="nav-right"><div class="nav-avatar">י</div></div>
+  </nav>
+  <div style="padding:24px">
+    <div class="booking-wrap">
+      <div class="page-title">📅 קביעת תור</div>
+      <div class="page-sub">ספרות דוד · תל אביב</div>
+
+      <div class="booking-grid">
+        <div class="booking-card">
+          <div class="booking-card-title">בחרו תאריך</div>
+          <div class="mini-cal-head">
+            <button class="cal-nav">→</button>
+            <span>יוני 2026</span>
+            <button class="cal-nav">←</button>
+          </div>
+          <div class="cal-days-head">
+            <span>א׳</span><span>ב׳</span><span>ג׳</span><span>ד׳</span><span>ה׳</span><span>ו׳</span><span>ש׳</span>
+          </div>
+          <div class="cal-days">
+            <div class="cal-day disabled">1</div><div class="cal-day has-appt" onclick="selectDay(this,'2')">2</div><div class="cal-day" onclick="selectDay(this,'3')">3</div><div class="cal-day has-appt" onclick="selectDay(this,'4')">4</div><div class="cal-day today" onclick="selectDay(this,'5')">5</div><div class="cal-day" onclick="selectDay(this,'6')">6</div><div class="cal-day disabled">7</div>
+            <div class="cal-day disabled">8</div><div class="cal-day" onclick="selectDay(this,'9')">9</div><div class="cal-day has-appt" onclick="selectDay(this,'10')">10</div><div class="cal-day" onclick="selectDay(this,'11')">11</div><div class="cal-day has-appt" onclick="selectDay(this,'12')">12</div><div class="cal-day" onclick="selectDay(this,'13')">13</div><div class="cal-day disabled">14</div>
+            <div class="cal-day disabled">15</div><div class="cal-day" onclick="selectDay(this,'16')">16</div><div class="cal-day" onclick="selectDay(this,'17')">17</div><div class="cal-day" onclick="selectDay(this,'18')">18</div><div class="cal-day" onclick="selectDay(this,'19')">19</div><div class="cal-day" onclick="selectDay(this,'20')">20</div><div class="cal-day disabled">21</div>
+          </div>
+        </div>
+
+        <div class="booking-card">
+          <div class="booking-card-title">שעות פנויות – <span id="booking-date-lbl">5/6</span></div>
+          <div class="time-grid" id="time-grid">
+            <div class="time-slot busy">09:00</div>
+            <div class="time-slot busy">09:30</div>
+            <div class="time-slot" onclick="selectTime(this)">10:00</div>
+            <div class="time-slot" onclick="selectTime(this)">10:30</div>
+            <div class="time-slot busy">11:00</div>
+            <div class="time-slot" onclick="selectTime(this)">11:30</div>
+            <div class="time-slot" onclick="selectTime(this)">12:00</div>
+            <div class="time-slot busy">12:30</div>
+            <div class="time-slot" onclick="selectTime(this)">14:00</div>
+            <div class="time-slot" onclick="selectTime(this)">14:30</div>
+            <div class="time-slot busy">15:00</div>
+            <div class="time-slot" onclick="selectTime(this)">15:30</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="booking-confirm-card" class="booking-confirm hidden">
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px">אישור תור</div>
+        <div class="confirm-row"><span class="confirm-key">עסק</span><span>ספרות דוד</span></div>
+        <div class="confirm-row"><span class="confirm-key">תאריך</span><span id="conf-date">5/6/2026</span></div>
+        <div class="confirm-row"><span class="confirm-key">שעה</span><span id="conf-time">--</span></div>
+        <div class="confirm-row"><span class="confirm-key">כתובת</span><span>דיזנגוף 120, ת"א</span></div>
+        <div class="confirm-row"><span class="confirm-key">תזכורת</span><span style="color:var(--green)">✓ WhatsApp 24 שעות לפני</span></div>
+        <button class="btn-purple" style="margin-top:16px" onclick="confirmBooking()">✅ אשרו תור</button>
+      </div>
+
+      <div id="booking-success-card" class="booking-confirm hidden" style="text-align:center;border-color:var(--green)">
+        <div style="font-size:50px;margin-bottom:12px">🎉</div>
+        <div style="font-size:20px;font-weight:800;margin-bottom:6px">התור נקבע בהצלחה!</div>
+        <div style="font-size:14px;color:var(--white50)">תזכורת תישלח ב-WhatsApp 24 שעות לפני</div>
+        <button class="btn-purple" style="margin-top:18px;max-width:200px" onclick="showPage('client-page')">לתורים שלי ←</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== DASHBOARD ========== -->
+<div class="page" id="dashboard-page">
+  <nav class="navbar">
+    <div class="nav-logo" onclick="showPage('main-page')">Bookly<span>.</span></div>
+    <div class="nav-center">
+      <button class="nav-link" onclick="showPage('main-page')">🏠 ראשי</button>
+    </div>
+    <div class="nav-right">
+      <span class="nav-role-badge" style="color:var(--purple3)">בעל עסק</span>
+      <div class="nav-avatar" style="background:var(--purple2)">ד</div>
+      <button class="btn-sm btn-sm-outline" style="font-size:13px;padding:7px 14px" onclick="logout()">יציאה</button>
+    </div>
+  </nav>
+
+  <div class="dash-layout">
+    <!-- SIDEBAR -->
+    <div class="dash-sidebar">
+      <div class="sidebar-item active" onclick="switchDash(this,'dash-overview')"><span class="si-icon">📊</span> סקירה</div>
+      <div class="sidebar-item" onclick="switchDash(this,'dash-calendar')"><span class="si-icon">📅</span> תורים</div>
+      <div class="sidebar-item" onclick="switchDash(this,'dash-clients')"><span class="si-icon">👥</span> לקוחות</div>
+      <div class="sidebar-item" onclick="switchDash(this,'dash-feed')"><span class="si-icon">📸</span> פיד</div>
+      <div class="sidebar-item" onclick="switchDash(this,'dash-settings')"><span class="si-icon">⚙️</span> הגדרות</div>
+    </div>
+
+    <div class="dash-content">
+      <!-- OVERVIEW -->
+      <div class="dash-section active" id="dash-overview">
+        <div style="font-size:20px;font-weight:800;margin-bottom:20px">שלום, דוד! 👋</div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">תורים היום</div>
+            <div class="stat-val">8</div>
+            <div class="stat-sub stat-green">+2 מאתמול</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">השבוע</div>
+            <div class="stat-val">34</div>
+            <div class="stat-sub stat-purple">+12%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">עוקבים</div>
+            <div class="stat-val">243</div>
+            <div class="stat-sub stat-purple">+5 השבוע</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">ביטולים</div>
+            <div class="stat-val">2</div>
+            <div class="stat-sub stat-red">השבוע</div>
+          </div>
+        </div>
+
+        <div class="card-box">
+          <div class="card-box-header">
+            <span>תורים להיום – יום ד׳ 5/6</span>
+            <button class="action-btn" onclick="openModal('add-appt-modal')">+ הוסף תור</button>
+          </div>
+          <div class="card-box-body" style="padding:0">
+            <table class="data-table">
+              <thead><tr><th>שם לקוח</th><th>טלפון</th><th>שעה</th><th>שירות</th><th>סטטוס</th><th>פעולות</th></tr></thead>
+              <tbody id="appt-table-body">
+                <tr>
+                  <td>יוסי כהן</td><td>050-1234567</td><td>09:00</td><td>תספורת + זקן</td>
+                  <td><span class="status-badge badge-completed">הושלם</span></td>
+                  <td><button class="action-btn" onclick="openEditAppt()">✏️ ערוך</button><button class="action-btn danger" onclick="cancelAppt(this)">❌ בטל</button></td>
+                </tr>
+                <tr>
+                  <td>משה לוי</td><td>050-7654321</td><td>10:00</td><td>תספורת</td>
+                  <td><span class="status-badge badge-confirmed">מאושר</span></td>
+                  <td><button class="action-btn" onclick="openEditAppt()">✏️ ערוך</button><button class="action-btn danger" onclick="cancelAppt(this)">❌ בטל</button></td>
+                </tr>
+                <tr>
+                  <td>אבי גולן</td><td>050-9876543</td><td>11:00</td><td>תספורת</td>
+                  <td><span class="status-badge badge-pending">ממתין</span></td>
+                  <td><button class="action-btn" onclick="openEditAppt()">✏️ ערוך</button><button class="action-btn danger" onclick="cancelAppt(this)">❌ בטל</button></td>
+                </tr>
+                <tr>
+                  <td>דני שמש</td><td>050-5551234</td><td>14:00</td><td>עיצוב זקן</td>
+                  <td><span class="status-badge badge-cancelled">בוטל</span></td>
+                  <td><button class="action-btn" onclick="openEditAppt()">✏️ ערוך</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALENDAR -->
+      <div class="dash-section" id="dash-calendar">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div style="font-size:20px;font-weight:800">לוח תורים – שבועי</div>
+          <div style="display:flex;gap:8px">
+            <button class="action-btn" onclick="openModal('add-appt-modal')">+ תור חדש</button>
+            <button class="action-btn" onclick="openModal('add-break-modal')">☕ הוסף הפסקה</button>
+          </div>
+        </div>
+        <div class="card-box">
+          <div class="card-box-body" style="padding:0">
+            <div class="week-cal">
+              <div class="week-grid">
+                <div class="week-head-cell"></div>
+                <div class="week-head-cell">א׳ 2/6</div>
+                <div class="week-head-cell">ב׳ 3/6</div>
+                <div class="week-head-cell">ג׳ 4/6</div>
+                <div class="week-head-cell" style="color:var(--purple3)">ד׳ 5/6</div>
+                <div class="week-head-cell">ה׳ 6/6</div>
+                <div class="week-head-cell">ו׳ 7/6</div>
+              </div>
+              <div class="week-grid">
+                <div class="week-time">09:00</div>
+                <div class="week-cell"><div class="appt-pill appt-confirmed">יוסי כ.</div></div>
+                <div class="week-cell"></div>
+                <div class="week-cell"><div class="appt-pill appt-confirmed">רן מ.</div></div>
+                <div class="week-cell today-col"><div class="appt-pill appt-completed">יוסי כ.</div></div>
+                <div class="week-cell"></div>
+                <div class="week-cell"><div class="appt-pill appt-pending">צבי ל.</div></div>
+              </div>
+              <div class="week-grid">
+                <div class="week-time">10:00</div>
+                <div class="week-cell"></div>
+                <div class="week-cell"><div class="appt-pill appt-confirmed">משה ל.</div></div>
+                <div class="week-cell"></div>
+                <div class="week-cell today-col"><div class="appt-pill appt-confirmed">משה ל.</div></div>
+                <div class="week-cell"><div class="appt-pill appt-confirmed">אורי ש.</div></div>
+                <div class="week-cell"></div>
+              </div>
+              <div class="week-grid">
+                <div class="week-time">11:00</div>
+                <div class="week-cell"><div class="appt-pill appt-pending">אבי ג.</div></div>
+                <div class="week-cell" style="background:rgba(245,158,11,0.05)"><div style="font-size:11px;color:var(--amber);padding:4px">☕ הפסקה</div></div>
+                <div class="week-cell"><div class="appt-pill appt-confirmed">נח ד.</div></div>
+                <div class="week-cell today-col"><div class="appt-pill appt-pending">אבי ג.</div></div>
+                <div class="week-cell"></div>
+                <div class="week-cell"><div class="appt-pill appt-confirmed">גיל מ.</div></div>
+              </div>
+              <div class="week-grid">
+                <div class="week-time">14:00</div>
+                <div class="week-cell"></div>
+                <div class="week-cell"><div class="appt-pill appt-confirmed">רן מ.</div></div>
+                <div class="week-cell"><div class="appt-pill appt-confirmed">עמי כ.</div></div>
+                <div class="week-cell today-col"><div class="appt-pill appt-cancelled">דני ש.</div></div>
+                <div class="week-cell"><div class="appt-pill appt-confirmed">ירון ב.</div></div>
+                <div class="week-cell"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-size:13px;color:var(--white50);display:flex;gap:16px">
+          <span style="color:var(--green)">■ מאושר</span>
+          <span style="color:var(--amber)">■ ממתין</span>
+          <span style="color:var(--red)">■ בוטל</span>
+          <span style="color:var(--purple3)">■ הושלם</span>
+        </div>
+      </div>
+
+      <!-- CLIENTS -->
+      <div class="dash-section" id="dash-clients">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div style="font-size:20px;font-weight:800">ניהול לקוחות</div>
+          <input style="background:var(--black3);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--white);direction:rtl;outline:none;width:180px" placeholder="🔍 חיפוש לקוח...">
+        </div>
+        <div class="card-box">
+          <div class="card-box-body" style="padding:0">
+            <table class="data-table">
+              <thead><tr><th>שם</th><th>טלפון</th><th>ביקורים</th><th>תור אחרון</th><th>סטטוס</th><th>פעולות</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>יוסי כהן</td><td>050-1234567</td><td>14</td><td>5/6/2026</td>
+                  <td><span class="status-badge badge-confirmed">VIP</span></td>
+                  <td><button class="action-btn danger" onclick="blockClient(this,'יוסי כהן')">🚫 חסום</button></td>
+                </tr>
+                <tr>
+                  <td>משה לוי</td><td>050-7654321</td><td>7</td><td>3/6/2026</td>
+                  <td><span class="status-badge badge-confirmed">קבוע</span></td>
+                  <td><button class="action-btn danger" onclick="blockClient(this,'משה לוי')">🚫 חסום</button></td>
+                </tr>
+                <tr>
+                  <td>אבי גולן</td><td>050-9876543</td><td>3</td><td>1/6/2026</td>
+                  <td><span class="status-badge badge-pending">רגיל</span></td>
+                  <td><button class="action-btn danger" onclick="blockClient(this,'אבי גולן')">🚫 חסום</button></td>
+                </tr>
+                <tr id="blocked-danny" style="opacity:0.5">
+                  <td>דני שמש</td><td>050-5551234</td><td>2</td><td>28/5/2026</td>
+                  <td><span class="status-badge badge-blocked">חסום</span></td>
+                  <td><button class="action-btn" onclick="unblockClient(this,'דני שמש')">✅ שחרר</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEED MANAGEMENT -->
+      <div class="dash-section" id="dash-feed">
+        <div style="font-size:20px;font-weight:800;margin-bottom:20px">ניהול פיד</div>
+        <div class="card-box" style="margin-bottom:20px">
+          <div class="card-box-header">פרסם פוסט חדש</div>
+          <div class="card-box-body">
+            <div class="upload-area" onclick="showToast('📤 בחרו קובץ להעלאה')">
+              <div style="font-size:32px;margin-bottom:8px">📸</div>
+              <div>גררו תמונה/סרטון או לחצו לבחירה</div>
+              <div style="font-size:12px;margin-top:4px">JPG, PNG, MP4 עד 50MB</div>
+            </div>
+            <textarea class="inp" style="margin-top:12px;min-height:80px;resize:vertical" placeholder="כתבו טקסט לפוסט..."></textarea>
+            <button class="btn-purple" style="margin-top:8px" onclick="showToast('✅ הפוסט פורסם בהצלחה!')">פרסם פוסט</button>
+          </div>
+        </div>
+        <div class="card-box">
+          <div class="card-box-header">פוסטים פורסמו</div>
+          <div class="card-box-body" style="padding:0">
+            <table class="data-table">
+              <thead><tr><th>תאריך</th><th>תוכן</th><th>לייקים</th><th>תגובות</th><th>פעולות</th></tr></thead>
+              <tbody>
+                <tr><td>5/6/2026</td><td>תספורת חדשה ומדהימה...</td><td>23</td><td>5</td><td><button class="action-btn danger" onclick="showToast('🗑️ הפוסט נמחק')">מחק</button></td></tr>
+                <tr><td>4/6/2026</td><td>מבצע מיוחד לחודש יוני...</td><td>41</td><td>8</td><td><button class="action-btn danger" onclick="showToast('🗑️ הפוסט נמחק')">מחק</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="dash-section" id="dash-settings">
+        <div style="font-size:20px;font-weight:800;margin-bottom:20px">הגדרות לוח שנה</div>
+        <div class="settings-grid">
+          <div class="card-box">
+            <div class="card-box-header">ימי ושעות עבודה</div>
+            <div class="card-box-body">
+              <div class="settings-row"><span>ראשון</span><input type="time" value="09:00" class="inp" style="padding:6px 8px;margin:0"><input type="time" value="18:00" class="inp" style="padding:6px 8px;margin:0"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+              <div class="settings-row"><span>שני</span><input type="time" value="09:00" class="inp" style="padding:6px 8px;margin:0"><input type="time" value="18:00" class="inp" style="padding:6px 8px;margin:0"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+              <div class="settings-row"><span>שלישי</span><input type="time" value="09:00" class="inp" style="padding:6px 8px;margin:0"><input type="time" value="18:00" class="inp" style="padding:6px 8px;margin:0"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+              <div class="settings-row"><span>שישי</span><input type="time" value="09:00" class="inp" style="padding:6px 8px;margin:0"><input type="time" value="14:00" class="inp" style="padding:6px 8px;margin:0"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+              <div class="settings-row"><span>שבת</span><input type="time" value="10:00" class="inp" style="padding:6px 8px;margin:0"><input type="time" value="14:00" class="inp" style="padding:6px 8px;margin:0"><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+            </div>
+          </div>
+          <div>
+            <div class="card-box" style="margin-bottom:16px">
+              <div class="card-box-header">הגדרות תורים</div>
+              <div class="card-box-body">
+                <label class="inp-label">משך תור ברירת מחדל</label>
+                <select class="inp">
+                  <option>15 דקות</option>
+                  <option selected>30 דקות</option>
+                  <option>45 דקות</option>
+                  <option>60 דקות</option>
+                </select>
+                <label class="inp-label">ביטול עד</label>
+                <select class="inp">
+                  <option>שעה לפני</option>
+                  <option selected>3 שעות לפני</option>
+                  <option>24 שעות לפני</option>
+                </select>
+              </div>
+            </div>
+            <div class="card-box">
+              <div class="card-box-header"><span>הפסקות קבועות</span><button class="action-btn" onclick="openModal('add-break-modal')">+ הוסף</button></div>
+              <div class="card-box-body" id="breaks-list">
+                <div class="break-item">☕ <span>13:00 – 14:00 (הפסקת צהריים)</span><button class="break-remove" onclick="this.parentElement.remove()">×</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-purple" style="margin-top:16px;max-width:200px" onclick="showToast('✅ ההגדרות נשמרו!')">שמור הגדרות</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== CLIENT PAGE ========== -->
+<div class="page" id="client-page">
+  <nav class="navbar">
+    <div class="nav-logo" onclick="showPage('main-page')">Bookly<span>.</span></div>
+    <div class="nav-center">
+      <button class="nav-link" onclick="showPage('main-page')">🏠 ראשי</button>
+    </div>
+    <div class="nav-right">
+      <span class="nav-role-badge">לקוח</span>
+      <div class="nav-avatar">י</div>
+      <button class="btn-sm btn-sm-outline" style="font-size:13px;padding:7px 14px" onclick="logout()">יציאה</button>
+    </div>
+  </nav>
+  <div id="client-page-inner" style="padding:24px">
+    <div class="client-wrap">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:28px">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;border:2px solid var(--purple3)">י</div>
+        <div>
+          <div style="font-size:20px;font-weight:800">שלום, יוסי! 👋</div>
+          <div style="font-size:13px;color:var(--white50)">050-1234567</div>
+        </div>
+      </div>
+
+      <div style="font-size:16px;font-weight:700;margin-bottom:14px">התורים הקרובים</div>
+      <div class="upcoming-card">
+        <div>
+          <div class="upcoming-biz">✂️ ספרות דוד</div>
+          <div class="upcoming-info">📅 יום ה׳ 12/6/2026 | ⏰ 10:00</div>
+          <div class="upcoming-info">📍 דיזנגוף 120, תל אביב</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+          <span class="status-badge badge-confirmed">מאושר</span>
+          <button class="action-btn danger" onclick="cancelMyAppt(this)">❌ בטל</button>
+        </div>
+      </div>
+
+      <div style="font-size:16px;font-weight:700;margin:24px 0 14px">היסטוריית תורים</div>
+      <div class="card-box">
+        <div class="card-box-body" style="padding:0">
+          <table
+              <thead><tr><th>עסק</th><th>תאריך</th><th>שעה</th><th>סטטוס</th></tr></thead>
+              <tbody>
+                <tr><td>ספרות דוד</td><td>22/5/2026</td><td>09:00</td><td><span class="status-badge badge-completed">הושלם</span></td></tr>
+                <tr><td>ספרות דוד</td><td>8/5/2026</td><td>11:00</td><td><span class="status-badge badge-completed">הושלם</span></td></tr>
+                <tr><td>ספרות דוד</td><td>24/4/2026</td><td>10:00</td><td><span class="status-badge badge-completed">הושלם</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      <div style="font-size:16px;font-weight:700;margin:24px 0 14px">עסקים שאני עוקב</div>
+      <div class="biz-grid" style="padding:0">
+        <div class="biz-card" onclick="showPage('biz-profile')">
+          <div class="biz-cover" style="background:linear-gradient(135deg,#1e1b4b,#312e81)">✂️</div>
+          <div class="biz-body">
+            <div class="biz-name">ספרות דוד</div>
+            <div class="biz-cat">✂️ ספר · ת"א</div>
+            <div class="biz-footer">
+              <span class="biz-stars">★ 4.9</span>
+              <button class="biz-book-btn" onclick="event.stopPropagation();showPage('booking-page')">קבע תור</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="add-appt-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('add-appt-modal')">×</button>
+    <div class="modal-title">➕ הוסף תור</div>
+    <label class="inp-label">שם לקוח *</label><input class="inp" placeholder="שם מלא" />
+    <label class="inp-label">טלפון *</label><input class="inp" placeholder="05X-XXXXXXX" />
+    <label class="inp-label">תאריך *</label><input class="inp" type="date" />
+    <label class="inp-label">שעה *</label><input class="inp" type="time" value="10:00" />
+    <label class="inp-label">שירות</label>
+    <select class="inp"><option>תספורת</option><option>עיצוב זקן</option><option>תספורת + זקן</option></select>
+    <label class="inp-label">הערות</label>
+    <textarea class="inp" placeholder="הערות..." style="min-height:60px;resize:vertical"></textarea>
+    <button class="btn-purple" style="margin-top:6px" onclick="addAppt()">✅ הוסף תור</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="add-break-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('add-break-modal')">×</button>
+    <div class="modal-title">☕ הוסף הפסקה</div>
+    <label class="inp-label">מ-</label><input class="inp" type="time" id="break-from" value="13:00" />
+    <label class="inp-label">עד-</label><input class="inp" type="time" id="break-to" value="14:00" />
+    <label class="inp-label">סוג</label>
+    <select class="inp" id="break-type"><option>הפסקת צהריים</option><option>הפסקה אישית</option><option>קפה</option></select>
+    <button class="btn-purple" style="margin-top:6px" onclick="addBreak()">✅ הוסף</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="edit-appt-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('edit-appt-modal')">×</button>
+    <div class="modal-title">✏️ ערוך תור</div>
+    <label class="inp-label">תאריך</label><input class="inp" type="date" value="2026-06-05" />
+    <label class="inp-label">שעה</label><input class="inp" type="time" value="10:00" />
+    <label class="inp-label">שירות</label>
+    <select class="inp"><option selected>תספורת</option><option>עיצוב זקן</option><option>תספורת + זקן</option></select>
+    <label class="inp-label">סטטוס</label>
+    <select class="inp"><option>ממתין</option><option selected>מאושר</option><option>הושלם</option><option>בוטל</option></select>
+    <textarea class="inp" placeholder="הערות..." style="min-height:60px;resize:vertical"></textarea>
+    <button class="btn-purple" style="margin-top:6px" onclick="closeModal('edit-appt-modal');showToast('✅ התור עודכן!')">שמור</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let currentRole = "client";
+
+function selectRole(role) {
+  currentRole = role;
+  document.querySelectorAll(".role-card").forEach(c => c.classList.remove("selected"));
+  document.getElementById("role-" + role).classList.add("selected");
+  document.getElementById("biz-reg-fields").classList.toggle("hidden", role !== "business");
+}
+
+function switchAuth(tab) {
+  document.getElementById("auth-login").classList.toggle("hidden", tab !== "login");
+  document.getElementById("auth-register").classList.toggle("hidden", tab !== "register");
+  document.getElementById("tab-login").classList.toggle("active", tab === "login");
+  document.getElementById("tab-register").classList.toggle("active", tab === "register");
+}
+
+function doLogin() { enterApp(currentRole); }
+
+function doRegister() {
+  const name = document.getElementById("reg-name").value.trim();
+  const phone = document.getElementById("reg-phone").value.trim();
+  if (!name) { showToast("⚠️ נא להזין שם מלא"); return; }
+  if (!phone) { showToast("⚠️ נא להזין מספר טלפון"); return; }
+  if (currentRole === "business") {
+    if (!document.getElementById("reg-bizname").value.trim()) { showToast("⚠️ נא להזין שם עסק"); return; }
+    if (!document.getElementById("reg-addr").value.trim()) { showToast("⚠️ נא להזין כתובת"); return; }
+    if (!document.getElementById("reg-prof").value) { showToast("⚠️ נא לבחור מקצוע"); return; }
+  }
+  enterApp(currentRole);
+}
+
+function enterApp(role) {
+  document.getElementById("splash").style.display = "none";
+  document.getElementById("dash-nav-btn").style.display = role === "business" ? "" : "none";
+  document.getElementById("client-nav-btn").style.display = role === "client" ? "" : "none";
+  document.querySelectorAll(".nav-role-badge").forEach(b => b.textContent = role === "business" ? "בעל עסק" : "לקוח");
+  showPage("main-page");
+}
+
+function logout() {
+  document.getElementById("splash").style.display = "flex";
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+}
+
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  const el = document.getElementById(id);
+  if (el) el.classList.add("active");
+  window.scrollTo(0,0);
+}
+
+function goDash() { showPage("dashboard-page"); }
+
+function filterCat(el) {
+  document.querySelectorAll(".cat-chip").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+}
+
+function switchDash(el, id) {
+  document.querySelectorAll(".sidebar-item").forEach(s => s.classList.remove("active"));
+  el.classList.add("active");
+  document.querySelectorAll(".dash-section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function selectDay(el, day) {
+  document.querySelectorAll(".cal-day").forEach(d => { if (!d.classList.contains("today")) d.classList.remove("selected"); });
+  el.classList.add("selected");
+  document.getElementById("booking-date-lbl").textContent = day + "/6";
+  document.getElementById("conf-date").textContent = day + "/6/2026";
+}
+
+function selectTime(el) {
+  document.querySelectorAll(".time-slot").forEach(s => s.classList.remove("selected"));
+  el.classList.add("selected");
+  document.getElementById("booking-confirm-card").classList.remove("hidden");
+  document.getElementById("booking-success-card").classList.add("hidden");
+  document.getElementById("conf-time").textContent = el.textContent;
+}
+
+function confirmBooking() {
+  document.getElementById("booking-confirm-card").classList.add("hidden");
+  document.getElementById("booking-success-card").classList.remove("hidden");
+  showToast("✅ התור נקבע!");
+}
+
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+document.querySelectorAll(".modal-overlay").forEach(m => {
+  m.addEventListener("click", function(e) { if (e.target === this) this.classList.remove("open"); });
+});
+
+function addAppt() { closeModal("add-appt-modal"); showToast("✅ התור נוסף!"); }
+
+function cancelAppt(btn) {
+  const row = btn.closest("tr");
+  const s = row.querySelector(".status-badge");
+  s.className = "status-badge badge-cancelled"; s.textContent = "בוטל";
+  btn.remove(); showToast("🗑️ התור בוטל");
+}
+
+function blockClient(btn, name) {
+  const row = btn.closest("tr");
+  const s = row.querySelector(".status-badge");
+  s.className = "status-badge badge-blocked"; s.textContent = "חסום";
+  row.style.opacity = "0.5";
+  btn.textContent = "✅ שחרר"; btn.classList.remove("danger");
+  btn.onclick = () => unblockClient(btn, name);
+  showToast("🚫 " + name + " נחסם");
+}
+
+function unblockClient(btn, name) {
+  const row = btn.closest("tr");
+  const s = row.querySelector(".status-badge");
+  s.className = "status-badge badge-pending"; s.textContent = "רגיל";
+  row.style.opacity = "1";
+  btn.textContent = "🚫 חסום"; btn.classList.add("danger");
+  btn.onclick = () => blockClient(btn, name);
+  showToast("✅ " + name + " שוחרר");
+}
+
+function addBreak() {
+  const from = document.getElementById("break-from").value;
+  const to = document.getElementById("break-to").value;
+  const type = document.getElementById("break-type").value;
+  const el = document.createElement("div");
+  el.className = "break-item";
+  el.innerHTML = "☕ <span>" + from + " – " + to + " (" + type + ")</span><button class=\"break-remove\" onclick=\"this.parentElement.remove()\">×</button>";
+  document.getElementById("breaks-list").appendChild(el);
+  closeModal("add-break-modal"); showToast("✅ הפסקה נוספה!");
+}
+
+function toggleLike(btn, countId) {
+  const el = document.getElementById(countId);
+  let n = parseInt(el.textContent);
+  if (btn.classList.contains("liked")) {
+    btn.classList.remove("liked"); el.textContent = n - 1;
+    btn.childNodes[0].textContent = "🤍 ";
+  } else {
+    btn.classList.add("liked"); el.textContent = n + 1;
+    btn.childNodes[0].textContent = "❤️ ";
+  }
+}
+
+function toggleComments(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === "none" ? "block" : "none";
+}
+
+function addComment(sid, iid) {
+  const inp = document.getElementById(iid);
+  const text = inp.value.trim(); if (!text) return;
+  const section = document.getElementById(sid);
+  const row = document.createElement("div"); row.className = "comment";
+  row.innerHTML = "<div class=\"comment-avatar\">י</div><div class=\"comment-text\"><div class=\"comment-name\">יוסי כהן</div>" + text + "</div>";
+  section.insertBefore(row, section.querySelector(".comment-inp-row"));
+  inp.value = "";
+}
+
+function toggleFollow(btn) {
+  const following = btn.textContent.includes("עוקב") && !btn.textContent.includes("הפסק");
+  if (!following) {
+    btn.textContent = "💜 עוקב"; btn.style.borderColor = "var(--purple)"; btn.style.color = "var(--purple-light)";
+    showToast("💜 עוקבים!");
+  } else {
+    btn.textContent = "🤍 עקוב"; btn.style.borderColor = ""; btn.style.color = "";
+    showToast("הפסקתם לעקוב");
+  }
+}
+
+function cancelMyAppt(btn) {
+  const card = btn.closest(".upcoming-card");
+  card.style.opacity = "0.4";
+  const s = card.querySelector(".status-badge"); s.className = "status-badge badge-cancelled"; s.textContent = "בוטל";
+  btn.remove(); showToast("🗑️ התור בוטל");
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+</script>
+</body>
+</html>
