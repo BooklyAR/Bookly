@@ -1025,6 +1025,13 @@ window._role = 'client';
 window._allAppts = [];
 window._accounts = JSON.parse(localStorage.getItem('bk_accounts') || '[]');
 window._weekOffset = 0;
+// נקה חשבונות ישנים בלי סיסמא
+const oldAccs = JSON.parse(localStorage.getItem('bk_accounts') || '[]');
+const cleanAccs = oldAccs.filter(a => a.pass && a.pass.length > 0);
+if (cleanAccs.length !== oldAccs.length) {
+  localStorage.setItem('bk_accounts', JSON.stringify(cleanAccs));
+  console.log('Cleaned ' + (oldAccs.length - cleanAccs.length) + ' passwordless accounts');
+}
 window._closedDays = []; // ימים סגורים (0=ראשון, 6=שבת)
 window._badPointsThreshold = 3; // ברירת מחדל - 3 נקודות = חסימה
 
@@ -1217,8 +1224,8 @@ function updateSwPanel() {
   const list = g('sw-users-list'); if (!list) return;
   const accounts = JSON.parse(localStorage.getItem('bk_accounts') || '[]');
   if (accounts.length === 0 && UD) {
-    saveAccount(UD.email, UD.bizName || UD.name, UD.role);
-    return updateSwPanel();
+    // לא יוצרים חשבון בלי סיסמא - הסיסמא תישמר בכניסה הבאה
+    return;
   }
   list.innerHTML = accounts.map(a => `
     <div class="sp-user ${a.email === CU?.email ? 'current' : ''}" data-email="${a.email}">
@@ -1248,10 +1255,22 @@ window.switchToAccount = async function(email) {
       swTab('in');
     }
   } else {
-    toast('🔑 נדרשת סיסמא');
-    showSplash();
-    g('in-email').value = email;
-    swTab('in');
+    // בקש סיסמא פעם אחת ושמור לפעמים הבאות
+    const pw = prompt('הכנס סיסמא עבור ' + email + '\n(פעם אחת בלבד, אחר כך יזכור)');
+    if (pw) {
+      toast('🔄 מתחבר...');
+      try {
+        await signOut(auth);
+        await signInWithEmailAndPassword(auth, email, pw);
+        saveAccount(email, acc?.name || '', acc?.role || 'client', pw);
+        toast('✅ מחובר! בפעם הבאה לא תצטרך סיסמא');
+      } catch(e) {
+        toast('⚠️ סיסמא שגויה');
+        showSplash();
+        g('in-email').value = email;
+        swTab('in');
+      }
+    }
   }
 }
 window.addAccount = function() {
