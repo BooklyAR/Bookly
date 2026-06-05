@@ -1558,8 +1558,10 @@ window.swD = function(el, id) {
 window.selRole = function(r) {
   window._role = r;
   document.querySelectorAll('.rc').forEach(c => c.classList.remove('sel'));
-  g('rc-'+r).classList.add('sel');
-  g('biz-fields').classList.toggle('hidden', r!=='business');
+  const el = document.getElementById('rc-' + (r === 'business' ? 'biz' : 'client'));
+  if (el) el.classList.add('sel');
+  const bf = document.getElementById('biz-fields');
+  if (bf) bf.classList.toggle('hidden', r !== 'business');
 }
 window.swTab = function(t) {
   g('fin').classList.toggle('hidden', t!=='in'); g('fup').classList.toggle('hidden', t!=='up');
