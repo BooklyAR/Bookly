@@ -566,10 +566,10 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="bwrap">
       <div class="avail-info">
         <div class="avail-header">
-          <div class="avail-av">✂️</div>
+          <div class="avail-av" id="book-biz-emoji">✂️</div>
           <div>
-            <div class="avail-biz" id="book-biz-name">ספרות דוד</div>
-            <div class="avail-meta">📍 דיזנגוף 120, ת"א · 📞 050-1234567</div>
+            <div class="avail-biz" id="book-biz-name">טוען...</div>
+            <div class="avail-meta" id="book-biz-meta">טוען פרטי עסק...</div>
           </div>
         </div>
         <div style="font-size:13px;color:var(--w50);display:flex;gap:16px;flex-wrap:wrap">
@@ -591,22 +591,17 @@ textarea.inp{resize:vertical;min-height:70px}
         </div>
         <div class="calcard">
           <div class="ccttl">שעות פנויות – <span id="dl">5/6</span></div>
-          <div class="tgrid">
-            <div class="tsl busy">09:00</div><div class="tsl busy">09:30</div>
-            <div class="tsl" onclick="selTime(this)">10:00</div><div class="tsl" onclick="selTime(this)">10:30</div>
-            <div class="tsl busy">11:00</div><div class="tsl" onclick="selTime(this)">11:30</div>
-            <div class="tsl" onclick="selTime(this)">12:00</div><div class="tsl busy">12:30</div>
-            <div class="tsl" onclick="selTime(this)">14:00</div><div class="tsl" onclick="selTime(this)">14:30</div>
-            <div class="tsl" onclick="selTime(this)">15:00</div><div class="tsl" onclick="selTime(this)">15:30</div>
+          <div class="tgrid" id="time-slots-grid">
+            <div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--w50)">בחרו תאריך כדי לראות שעות פנויות</div>
           </div>
         </div>
       </div>
       <div id="bcc" class="bconf hidden">
         <div style="font-size:16px;font-weight:700;margin-bottom:14px">✅ אישור תור</div>
-        <div class="crow2"><span class="ckey">עסק</span><span id="conf-biz">ספרות דוד</span></div>
-        <div class="crow2"><span class="ckey">תאריך</span><span id="conf-date">5/6/2026</span></div>
+        <div class="crow2"><span class="ckey">עסק</span><span id="conf-biz">—</span></div>
+        <div class="crow2"><span class="ckey">תאריך</span><span id="conf-date">—</span></div>
         <div class="crow2"><span class="ckey">שעה</span><span id="conf-time">--</span></div>
-        <div class="crow2"><span class="ckey">כתובת</span><span>דיזנגוף 120, ת"א</span></div>
+        <div class="crow2"><span class="ckey">כתובת</span><span id="conf-addr">—</span></div>
         <button class="btnp" style="margin-top:16px" onclick="confirmBook()">✅ קבע תור</button>
       </div>
       <div id="bsc" class="bconf hidden" style="text-align:center;border-color:var(--green)">
@@ -1265,13 +1260,22 @@ window.openBizProfile = async function(uid) {
   if (!snap.exists()) return;
   const u = snap.val();
   const emojis = {ספר:'✂️',קוסמטיקאית:'💅','ספרות נשים':'👩‍🦱',"מסאז'":'💆',ציפורניים:'💄'};
+  const em = emojis[u.profession] || '🏪';
   g('bp-name').textContent = u.bizName || 'עסק';
-  g('bp-prof').textContent = (emojis[u.profession]||'🏪') + ' ' + (u.profession||'');
+  g('bp-prof').textContent = em + ' ' + (u.profession||'');
   g('bp-addr').textContent = '📍 ' + (u.bizAddress||'');
   g('bp-phone').textContent = '📞 ' + (u.bizPhone || u.phone || '');
-  g('biz-avatar').textContent = emojis[u.profession] || '🏪';
+  g('biz-avatar').textContent = em;
+  // שמור את כל הנתונים של העסק
   window._viewingBizId = uid;
-  window._viewingBizName = u.bizName;
+  window._viewingBiz = {
+    id: uid,
+    name: u.bizName || 'עסק',
+    address: u.bizAddress || '',
+    phone: u.bizPhone || u.phone || '',
+    profession: u.profession || '',
+    emoji: em
+  };
   goPage('biz-profile');
 }
 
@@ -1476,18 +1480,62 @@ window.confirmBook = async function() {
   if (!CU) { toast('⚠️ יש להתחבר קודם'); return; }
   const date = g('conf-date').textContent, time = g('conf-time').textContent;
   if (time === '--') { toast('⚠️ נא לבחור שעה'); return; }
+  const biz = window._viewingBiz || {};
   try {
     await push(ref(db,'appointments'), {
       clientId: CU.uid, clientName: UD?.name||'לקוח',
       clientPhone: UD?.phone||'',
-      businessId: window._viewingBizId||'demo',
-      businessName: window._viewingBizName||'ספרות דוד',
-      businessAddress: 'דיזנגוף 120, תל אביב',
-      date, time, service:'תספורת', status:'confirmed', createdAt:Date.now()
+      businessId: biz.id || window._viewingBizId || 'demo',
+      businessName: biz.name || 'עסק',
+      businessAddress: biz.address || '',
+      date, time, service: biz.profession || 'שירות', status:'confirmed', createdAt:Date.now()
     });
     g('bcc').classList.add('hidden'); g('bsc').classList.remove('hidden');
     toast('✅ התור נקבע!'); loadClientData();
   } catch(e) { toast('⚠️ שגיאה: ' + e.message); }
+}
+
+// ── טעינת עמוד קביעת תור עם נתונים אמיתיים ──
+async function loadBookingPage() {
+  const biz = window._viewingBiz || {};
+  // עדכון כותרת
+  const emoji = g('book-biz-emoji'); if (emoji) emoji.textContent = biz.emoji || '🏪';
+  const bname = g('book-biz-name'); if (bname) bname.textContent = biz.name || 'עסק';
+  const bmeta = g('book-biz-meta');
+  if (bmeta) bmeta.textContent = '📍 ' + (biz.address || '') + ' · 📞 ' + (biz.phone || '');
+  // עדכון אישור
+  const cbiz = g('conf-biz'); if (cbiz) cbiz.textContent = biz.name || 'עסק';
+  const caddr = g('conf-addr'); if (caddr) caddr.textContent = biz.address || '';
+  // טען תורים קיימים לעסק הזה כדי להראות מה תפוס
+  window._bizAppts = [];
+  try {
+    const snap = await get(ref(db, 'appointments'));
+    if (snap.exists()) {
+      snap.forEach(c => {
+        const a = c.val();
+        if (a.businessId === biz.id && a.status !== 'cancelled') {
+          window._bizAppts.push(a);
+        }
+      });
+    }
+  } catch(e) {}
+  // הצג slots ברירת מחדל ליום הנוכחי
+  loadTimeSlots('5');
+}
+
+function loadTimeSlots(day) {
+  const grid = g('time-slots-grid');
+  if (!grid) return;
+  const date = day + '/6/2026';
+  const times = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'];
+  const busyTimes = (window._bizAppts || []).filter(a => a.date === date).map(a => a.time);
+  grid.innerHTML = times.map(t => {
+    const isBusy = busyTimes.includes(t);
+    return '<div class="tsl' + (isBusy ? ' busy' : '') + '"' + (isBusy ? '' : ' onclick="selTime(this)"') + '>' + t + '</div>';
+  }).join('');
+  // עדכון תאריך
+  g('dl').textContent = day + '/6';
+  g('conf-date').textContent = date;
 }
 
 window.cancelMyAppt = async function(id, btn) {
@@ -1605,6 +1653,7 @@ window.goPage = function(id) {
   window.scrollTo(0,0);
   g('sw-panel').classList.remove('open');
   if (id==='dashboard-page') loadDash();
+  if (id==='booking-page') loadBookingPage();
   if (id==='client-page') loadClientData();
   if (id==='feed-page') { loadFeedPosts();
     if (UD) { g('feed-title').textContent = '📸 הפיד של ' + (UD.bizName||'העסק שלי'); }
@@ -1640,7 +1689,10 @@ window.togPw = function(id, btn) {
 }
 window.selDay = function(el, d) {
   document.querySelectorAll('.cd').forEach(c=>{ if(!c.classList.contains('today')) c.classList.remove('sel'); });
-  el.classList.add('sel'); g('dl').textContent=d+'/6'; g('conf-date').textContent=d+'/6/2026';
+  el.classList.add('sel');
+  g('bcc').classList.add('hidden');
+  g('bsc').classList.add('hidden');
+  loadTimeSlots(d);
 }
 window.selTime = function(el) {
   document.querySelectorAll('.tsl').forEach(s=>s.classList.remove('sel'));
