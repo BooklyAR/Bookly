@@ -1030,32 +1030,54 @@ document.getElementById('rc-biz').addEventListener('click', () => {
 });
 
 // ── AUTH STATE ──
-// הסתר מסך טעינה אחרי 2 שניות גם אם Firebase איטי
+// הסתר מסך טעינה מקסימום 1.5 שניות
 setTimeout(() => {
   const ls = g('ls');
   if (ls && ls.style.display !== 'none') {
     ls.style.display = 'none';
     if (!CU) showSplash();
+    else if (!UD) {
+      // משתמש מחובר אבל עדיין לא טענו נתונים – נסה cache
+      const cached = localStorage.getItem('bk_ud_' + CU.uid);
+      if (cached) { UD = JSON.parse(cached); enterApp(); }
+      else showSplash(); // אין cache, תתחבר מחדש
+    }
   }
-}, 2000);
+}, 1500);
 
 onAuthStateChanged(auth, async u => {
-  g('ls').style.display = 'none';
   if (u) {
     CU = u;
+    // קודם כל בדוק cache מקומי – כניסה מיידית
     const cached = localStorage.getItem('bk_ud_' + u.uid);
     if (cached) {
       UD = JSON.parse(cached);
+      g('ls').style.display = 'none';
       enterApp();
+      // עדכון ברקע (לא חוסם)
       get(ref(db, 'users/' + u.uid)).then(snap => {
         if (snap.exists()) { UD = snap.val(); localStorage.setItem('bk_ud_' + u.uid, JSON.stringify(UD)); }
-      });
+      }).catch(() => {});
     } else {
-      const snap = await get(ref(db, 'users/' + u.uid));
-      if (snap.exists()) { UD = snap.val(); localStorage.setItem('bk_ud_' + u.uid, JSON.stringify(UD)); enterApp(); }
-      else showSplash();
+      // אין cache – חייב לטעון מ-Firebase (פעם ראשונה)
+      try {
+        const snap = await get(ref(db, 'users/' + u.uid));
+        g('ls').style.display = 'none';
+        if (snap.exists()) {
+          UD = snap.val();
+          localStorage.setItem('bk_ud_' + u.uid, JSON.stringify(UD));
+          enterApp();
+        } else showSplash();
+      } catch(e) {
+        g('ls').style.display = 'none';
+        showSplash();
+      }
     }
-  } else { CU = null; UD = null; showSplash(); }
+  } else {
+    CU = null; UD = null;
+    g('ls').style.display = 'none';
+    showSplash();
+  }
 });
 
 function showSplash() {
@@ -1090,11 +1112,13 @@ window.doRegister = async function() {
     };
     await set(ref(db, 'users/' + cred.user.uid), ud);
     saveAccount(email, name, role);
+    // שמור cache לכניסה מהירה בפעם הבאה
+    localStorage.setItem('bk_ud_' + cred.user.uid, JSON.stringify(ud));
     // כניסה אוטומטית אחרי הרשמה
     CU = cred.user;
     UD = ud;
     toast('✅ נרשמת בהצלחה! ברוך הבא 🎉');
-    setTimeout(() => enterApp(), 800);
+    setTimeout(() => enterApp(), 500);
   } catch(e) {
     btn.disabled = false; btn.textContent = 'הרשמה ←';
     if (e.code === 'auth/email-already-in-use') showErr('האימייל כבר קיים');
@@ -1108,8 +1132,13 @@ window.doLogin = async function() {
   if (!email || !pass) { showErr('נא למלא אימייל וסיסמא'); return; }
   const btn = g('inbtn'); btn.disabled = true; btn.textContent = 'מתחבר...';
   try {
-    await signInWithEmailAndPassword(auth, email, pass);
+    const loginCred = await signInWithEmailAndPassword(auth, email, pass);
     saveAccount(email, '', window._role);
+    // נסה לטעון ולשמור cache מיד
+    try {
+      const snap = await get(ref(db, 'users/' + loginCred.user.uid));
+      if (snap.exists()) localStorage.setItem('bk_ud_' + loginCred.user.uid, JSON.stringify(snap.val()));
+    } catch(e) {}
   } catch(e) {
     btn.disabled = false; btn.textContent = 'כניסה ←';
     if (e.code?.includes('invalid-credential') || e.code?.includes('wrong-password')) showErr('אימייל או סיסמא שגויים');
