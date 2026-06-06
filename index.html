@@ -211,7 +211,7 @@ textarea.inp{resize:vertical;min-height:70px}
 .cd:hover:not(.dis):not(.today){background:var(--psub);color:var(--pl)}
 .cd.today{background:var(--p);color:var(--w);font-weight:700}
 .cd.sel{background:var(--p);color:var(--w)}
-.cd.has{color:var(--p3);font-weight:600}
+.cd.has{color:var(--p3);font-weight:600;outline:2px solid rgba(52,211,153,.5);outline-offset:-2px}
 .cd.dis{color:rgba(255,255,255,.2);cursor:default}
 .cd.closed{background:rgba(239,68,68,.15);color:var(--red);cursor:default;text-decoration:line-through}
 .cd.closed:hover{background:rgba(239,68,68,.15);color:var(--red)}
@@ -391,7 +391,7 @@ textarea.inp{resize:vertical;min-height:70px}
 .bp-section{display:none}.bp-section.active{display:block}
 
 /* CALENDAR DYNAMIC */
-.cd.past{color:rgba(255,255,255,.18);cursor:default;pointer-events:none}
+.cd.past{color:rgba(255,255,255,.18);cursor:not-allowed;pointer-events:none}
 .cd.empty{background:none;pointer-events:none}
 
 /* NOTIFICATIONS */
@@ -526,7 +526,7 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="nright">
       <span class="nav-badge" id="nb1">לקוח</span>
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na1" style="background:var(--p)" onclick="goPage('profile-page')">?<div class="av-dot"></div></div>
+      <div class="nav-av" id="na1" style="background:var(--p)" onclick="togAvMenu(event)">?<div class="av-dot"></div></div>
       <button class="btnout" onclick="doLogout()">יציאה</button>
     </div>
   </nav>
@@ -562,7 +562,7 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="ncenter"><button class="nlink" onclick="goPage('main-page')">← חזרה</button></div>
     <div class="nright">
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na2" style="background:var(--p)" onclick="goPage('profile-page')">?</div>
+      <div class="nav-av" id="na2" style="background:var(--p)" onclick="togAvMenu(event)">?</div>
     </div>
   </nav>
   <div class="pcov" id="biz-cover" style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%)">
@@ -580,15 +580,8 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="pacts">
       <button class="bsm bsm-p" onclick="goPage('booking-page')">📅 קבע תור</button>
       <button class="bsm bsm-s" onclick="togFollow(this)">🤍 עקוב</button>
-      <button class="bsm bsm-s" onclick="goPage('feed-page')">📸 פיד</button>
+      <button class="bsm bsm-s" onclick="window._feedViewBizId=window._viewingBizId;goPage('feed-page')">📸 פיד</button>
     </div>
-  </div>
-  <div style="padding:0 24px 8px;font-size:13px;color:var(--w50)">סטוריז</div>
-  <div class="srrow">
-    <div class="sw"><div class="sring"><div class="sinn">✂️</div></div><div class="slbl">היום</div></div>
-    <div class="sw"><div class="sring"><div class="sinn">🪒</div></div><div class="slbl">תספורת</div></div>
-    <div class="sw"><div class="sring" style="background:linear-gradient(135deg,#10b981,#7c3aed)"><div class="sinn">🏆</div></div><div class="slbl">פרס</div></div>
-    <div class="sw"><div class="sring" style="background:linear-gradient(135deg,#f59e0b,#9333ea)"><div class="sinn">🎉</div></div><div class="slbl">מבצע</div></div>
   </div>
   <div class="bp-tabs">
     <div class="bp-tab active" id="bpt-posts" onclick="switchBizTab('posts')">📸 פוסטים</div>
@@ -609,7 +602,7 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="ncenter"><button class="nlink" onclick="goPage('biz-profile')">← חזרה לפרופיל</button></div>
     <div class="nright">
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na3" style="background:var(--p)" onclick="goPage('profile-page')">?</div>
+      <div class="nav-av" id="na3" style="background:var(--p)" onclick="togAvMenu(event)">?</div>
     </div>
   </nav>
   <div style="padding:24px">
@@ -668,12 +661,12 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="nlogo" onclick="goPage('main-page')">Bookly<span>.</span></div>
     <div class="ncenter">
       <button class="nlink" onclick="goPage('main-page')">🏠 ראשי</button>
-      <button class="nlink" onclick="goPage('feed-page')">📸 הפיד שלי</button>
+      <button class="nlink" onclick="window._feedViewBizId=null;goPage('feed-page')">📸 הפיד שלי</button>
     </div>
     <div class="nright">
       <span class="nav-badge" style="color:var(--p3)">בעל עסק</span>
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na4" style="background:var(--p2)" onclick="goPage('profile-page')">?<div class="av-dot"></div></div>
+      <div class="nav-av" id="na4" style="background:var(--p2)" onclick="togAvMenu(event)">?<div class="av-dot"></div></div>
       <button class="btnout" onclick="doLogout()">יציאה</button>
     </div>
   </nav>
@@ -688,7 +681,7 @@ textarea.inp{resize:vertical;min-height:70px}
       <div class="sbi" onclick="swD(this,'d-settings')"><span class="sbi-ic">⚙️</span> הגדרות לוח</div>
       <div class="sbi" onclick="swD(this,'d-profile')"><span class="sbi-ic">🏪</span> פרופיל עסק</div>
       <div class="dsb-divider"></div>
-      <div class="sbi" onclick="goPage('feed-page')"><span class="sbi-ic">📸</span> הפיד שלי</div>
+      <div class="sbi" onclick="window._feedViewBizId=null;goPage('feed-page')"><span class="sbi-ic">📸</span> הפיד שלי</div>
     </div>
 
     <div class="dcontent">
@@ -707,7 +700,7 @@ textarea.inp{resize:vertical;min-height:70px}
             <div class="bdh-actions">
               <button class="bdh-edit" onclick="openM('m-edit-biz')">✏️ ערוך פרופיל</button>
               <button class="bdh-edit" onclick="goPage('biz-profile')">👁 צפה בפרופיל</button>
-              <button class="bdh-edit" onclick="goPage('feed-page')">📸 ערוך פיד</button>
+              <button class="bdh-edit" onclick="window._feedViewBizId=null;goPage('feed-page')">📸 ערוך פיד</button>
             </div>
           </div>
           <span class="sbadge bok" style="align-self:flex-start">פעיל ✓</span>
@@ -899,7 +892,7 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="nright">
       <span class="nav-badge" id="nb2">לקוח</span>
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na5" style="background:var(--p)" onclick="goPage('profile-page')">?<div class="av-dot"></div></div>
+      <div class="nav-av" id="na5" style="background:var(--p)" onclick="togAvMenu(event)">?<div class="av-dot"></div></div>
       <button class="btnout" onclick="doLogout()">יציאה</button>
     </div>
   </nav>
@@ -934,7 +927,7 @@ textarea.inp{resize:vertical;min-height:70px}
     </div>
     <div class="nright">
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na6" style="background:var(--p2)" onclick="goPage('profile-page')">?</div>
+      <div class="nav-av" id="na6" style="background:var(--p2)" onclick="togAvMenu(event)">?</div>
       <button class="btnout" onclick="doLogout()">יציאה</button>
     </div>
   </nav>
@@ -944,10 +937,11 @@ textarea.inp{resize:vertical;min-height:70px}
       <div style="font-size:14px;color:var(--w50);margin-bottom:24px" id="feed-sub">פרסמו תמונות, סרטונים ועדכונים ללקוחות</div>
 
       <!-- COMPOSE -->
-      <div class="feed-compose">
+      <div class="feed-compose" id="feed-compose">
         <div class="fc-title">✍️ פרסם פוסט חדש</div>
+        <input type="file" id="post-img-file" accept="image/*" style="display:none"/>
         <div class="media-opts">
-          <button class="mopt" onclick="toast('📷 הוספת תמונה – בקרוב!')">📷 תמונה</button>
+          <button class="mopt" onclick="document.getElementById('post-img-file').click()">📷 תמונה</button>
           <button class="mopt" onclick="toast('🎥 הוספת סרטון – בקרוב!')">🎥 סרטון</button>
           <button class="mopt" onclick="toast('🎉 הוספת מבצע – בקרוב!')">🎉 מבצע</button>
           <button class="mopt" onclick="toast('📅 שיתוף זמינות – בקרוב!')">📅 זמינות</button>
@@ -1080,6 +1074,13 @@ textarea.inp{resize:vertical;min-height:70px}
   </div>
 </div>
 
+<!-- AVATAR MINI MENU -->
+<div id="av-menu" style="display:none;position:fixed;z-index:9999;background:var(--bg3);border:1px solid var(--bd);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);min-width:160px;overflow:hidden">
+  <div style="padding:12px 16px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--bd);transition:background .15s" onmouseover="this.style.background='var(--psub)'" onmouseout="this.style.background=''" onclick="closeAvMenu();togSwPanel()">🔄 החלף משתמש</div>
+  <div style="padding:12px 16px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--bd);transition:background .15s" onmouseover="this.style.background='var(--psub)'" onmouseout="this.style.background=''" onclick="closeAvMenu();goPage('profile-page')">👤 אזור אישי</div>
+  <div style="padding:12px 16px;cursor:pointer;font-size:14px;color:var(--red);transition:background .15s" onmouseover="this.style.background='rgba(239,68,68,.1)'" onmouseout="this.style.background=''" onclick="closeAvMenu();doLogout()">🚪 יציאה</div>
+</div>
+
 <!-- PERSONAL PROFILE PAGE -->
 <div class="page" id="profile-page">
   <nav class="nb">
@@ -1092,7 +1093,8 @@ textarea.inp{resize:vertical;min-height:70px}
   </nav>
   <div style="padding:24px">
     <div class="prof-wrap">
-      <div class="prof-av-big" id="prof-av-big" onclick="promptPicUrl()">?</div>
+      <input type="file" id="prof-pic-file" accept="image/*" style="display:none"/>
+      <div class="prof-av-big" id="prof-av-big" onclick="document.getElementById('prof-pic-file').click()" style="cursor:pointer">?</div>
       <div style="text-align:center;font-size:13px;color:var(--w50);margin-bottom:24px">לחץ על התמונה לשינוי</div>
       <div class="cbox" style="margin-bottom:16px">
         <div class="cbox-h">פרטים אישיים</div>
@@ -1100,7 +1102,6 @@ textarea.inp{resize:vertical;min-height:70px}
           <label class="ilbl">שם מלא</label><input class="inp" id="prof-name" placeholder="שם מלא"/>
           <label class="ilbl">טלפון</label><input class="inp" id="prof-phone" placeholder="05X-XXXXXXX"/>
           <label class="ilbl">אימייל</label><input class="inp" id="prof-email" type="email" placeholder="mail@example.com"/>
-          <label class="ilbl">כתובת URL לתמונת פרופיל</label><input class="inp" id="prof-pic-url" placeholder="https://..."/>
           <button class="btnp" onclick="saveProfile()">💾 שמור פרטים</button>
         </div>
       </div>
@@ -1191,6 +1192,30 @@ document.getElementById('rc-biz').addEventListener('click', () => {
   document.querySelectorAll('.rc').forEach(c => c.classList.remove('sel'));
   document.getElementById('rc-biz').classList.add('sel');
   document.getElementById('biz-fields').classList.remove('hidden');
+});
+
+// Profile picture file picker
+document.getElementById('prof-pic-file')?.addEventListener('change', function() {
+  const file = this.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    window._profPicBase64 = ev.target.result;
+    const av = g('prof-av-big');
+    if (av) av.innerHTML = `<img src="${ev.target.result}" alt="תמונה" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
+  };
+  reader.readAsDataURL(file);
+});
+
+// Post image file picker
+document.getElementById('post-img-file')?.addEventListener('change', function() {
+  const file = this.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    window._postImgBase64 = ev.target.result;
+    const prev = g('fc-preview');
+    if (prev) prev.innerHTML = `<img src="${ev.target.result}" style="max-width:100%;max-height:200px;border-radius:8px;margin-top:8px"/>`;
+  };
+  reader.readAsDataURL(file);
 });
 
 // ── AUTH STATE ──
@@ -1524,6 +1549,7 @@ async function loadDash() {
   if (snap.exists()) snap.forEach(c => all.push({id:c.key,...c.val()}));
   const mine = all.filter(a => a.businessId === CU.uid);
   window._allAppts = mine;
+  console.log('loadDash: mine.length=', mine.length, 'businessId=', CU.uid);
 
   const today = new Date().toISOString().split('T')[0];
   const todayA = mine.filter(a => a.date === today);
@@ -1805,6 +1831,10 @@ async function loadBookingPage() {
       if (whSnap.exists()) workHours = whSnap.val();
     } catch(e) {}
   }
+  // Also close days where workHours[i].open === false
+  Object.entries(workHours || {}).forEach(([i, wh]) => {
+    if (wh.open === false && !closedDays.includes(parseInt(i))) closedDays.push(parseInt(i));
+  });
   window._bookingClosedDays = closedDays;
   window._bizWorkHours = workHours;
   // Check if client is blocked
@@ -1860,10 +1890,10 @@ function loadTimeSlots(day) {
   const isoDate = yr + '-' + String(mo).padStart(2,'0') + '-' + String(d).padStart(2,'0');
   // Build slots from work hours for this day-of-week
   const dow = new Date(yr, mo-1, d).getDay();
-  const wh = (window._bizWorkHours || {})[dow] || {open:'09:00', close:'18:00'};
+  const wh = (window._bizWorkHours || {})[dow] || {start:'09:00', end:'18:00'};
   const slots = [];
-  let [oh, om] = wh.open.split(':').map(Number);
-  const [ch, cm] = wh.close.split(':').map(Number);
+  let [oh, om] = (wh.start || wh.open || '09:00').split(':').map(Number);
+  const [ch, cm] = (wh.end || wh.close || '18:00').split(':').map(Number);
   while (oh * 60 + om < ch * 60 + cm) {
     slots.push(String(oh).padStart(2,'0') + ':' + String(om).padStart(2,'0'));
     om += 30; if (om >= 60) { oh++; om -= 60; }
@@ -1947,35 +1977,40 @@ window.saveBizProfileModal = async function() {
 // ── FEED ──
 window.pubPost = async function() {
   const txt = g('post-txt').value.trim();
-  if (!txt) { toast('⚠️ נא לכתוב תוכן'); return; }
+  if (!txt && !window._postImgBase64) { toast('⚠️ נא לכתוב תוכן או לבחור תמונה'); return; }
   try {
-    await push(ref(db,'posts'), {
-      bizId: CU.uid, bizName: UD?.bizName||'עסק',
-      text: txt, likes:0, createdAt:Date.now()
-    });
-    g('post-txt').value = ''; toast('✅ הפוסט פורסם!'); loadFeedPosts();
+    const postData = { bizId: CU.uid, bizName: UD?.bizName||'עסק', text: txt, likes:0, createdAt:Date.now() };
+    if (window._postImgBase64) postData.imageData = window._postImgBase64;
+    await push(ref(db,'posts'), postData);
+    g('post-txt').value = '';
+    window._postImgBase64 = null;
+    const prev = g('fc-preview'); if (prev) prev.textContent = 'לא נבחר קובץ';
+    toast('✅ הפוסט פורסם!'); loadFeedPosts();
   } catch(e) { toast('⚠️ שגיאה: ' + e.message); }
 }
 
-async function loadFeedPosts() {
+async function loadFeedPosts(bizId) {
   const el = g('feed-posts-list'); if (!el) return;
+  const targetBizId = bizId || CU?.uid;
+  const isOwn = !bizId || bizId === CU?.uid;
   const snap = await get(ref(db,'posts'));
-  if (!snap.exists()) { el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--w50)">אין פוסטים עדיין · פרסמו פוסט ראשון! ⬆️</div>'; return; }
+  if (!snap.exists()) { el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--w50)">' + (isOwn ? 'אין פוסטים עדיין · פרסמו פוסט ראשון! ⬆️' : 'אין פוסטים עדיין') + '</div>'; return; }
   let posts = []; snap.forEach(c => posts.push({id:c.key,...c.val()}));
-  posts = posts.filter(p => p.bizId === CU?.uid).sort((a,b) => b.createdAt - a.createdAt);
-  if (posts.length === 0) { el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--w50)">עדיין לא פרסמת · כתוב פוסט ראשון! ⬆️</div>'; return; }
+  posts = posts.filter(p => p.bizId === targetBizId).sort((a,b) => b.createdAt - a.createdAt);
+  if (posts.length === 0) { el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--w50)">' + (isOwn ? 'עדיין לא פרסמת · כתוב פוסט ראשון! ⬆️' : 'אין פוסטים עדיין') + '</div>'; return; }
   el.innerHTML = posts.map(p => `
     <div class="post">
       <div class="ph">
-        <div class="pav2">${(UD?.bizName||'?')[0]}</div>
+        <div class="pav2">${(p.bizName||'?')[0]}</div>
         <div><div class="pbiz">${p.bizName||'העסק שלי'}</div>
         <div class="ptime">${new Date(p.createdAt).toLocaleDateString('he-IL')}</div></div>
-        <button class="abtn d" style="margin-right:auto" onclick="deletePost('${p.id}')">🗑️ מחק</button>
+        ${isOwn ? `<button class="abtn d" style="margin-right:auto" onclick="deletePost('${p.id}')">🗑️ מחק</button>` : ''}
       </div>
       <div class="pbody">
-        <div class="ptxt">${p.text}</div>
+        ${p.imageData ? `<img src="${p.imageData}" style="width:100%;border-radius:8px;margin-bottom:8px;max-height:300px;object-fit:cover"/>` : ''}
+        <div class="ptxt">${p.text||''}</div>
         <div class="pacts">
-          <button class="pab">❤️ ${p.likes} לייקים</button>
+          <button class="pab">❤️ ${p.likes||0} לייקים</button>
         </div>
       </div>
     </div>`).join('');
@@ -1998,8 +2033,19 @@ window.goPage = function(id) {
   if (id==='dashboard-page') loadDash();
   if (id==='booking-page') loadBookingPage();
   if (id==='client-page') loadClientData();
-  if (id==='feed-page') { loadFeedPosts();
-    if (UD) { g('feed-title').textContent = '📸 הפיד של ' + (UD.bizName||'העסק שלי'); }
+  if (id==='feed-page') {
+    const feedBizId = window._feedViewBizId || CU?.uid;
+    const isOwn = !window._feedViewBizId || window._feedViewBizId === CU?.uid;
+    const compose = g('feed-compose');
+    if (compose) compose.style.display = (isOwn && UD?.role === 'business') ? '' : 'none';
+    loadFeedPosts(feedBizId);
+    if (isOwn && UD) {
+      g('feed-title').textContent = '📸 הפיד שלי';
+      if (g('feed-sub')) g('feed-sub').textContent = 'פרסמו תמונות, סרטונים ועדכונים ללקוחות';
+    } else {
+      g('feed-title').textContent = '📸 פיד ' + (window._viewingBiz?.name || 'עסק');
+      if (g('feed-sub')) g('feed-sub').textContent = '';
+    }
   }
   if (id==='main-page' && UD?.role==='client') loadBizGrid();
   if (id==='profile-page') loadProfilePage();
@@ -2113,6 +2159,7 @@ window.renderWeekCal = function() {
   const times = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
   const today = new Date().toISOString().split('T')[0];
   const myAppts = window._allAppts || [];
+  console.log('renderWeekCal: appts=', myAppts.length, 'sample dates=', myAppts.slice(0,3).map(a=>a.date));
   let html = '';
   times.forEach(t => {
     html += '<div class="wgrid"><div class="wt">'+t+'</div>';
@@ -2211,7 +2258,7 @@ window.saveClosedDays = async function() {
     const cb = row.querySelector('input[type=checkbox]');
     const times = row.querySelectorAll('input[type=time]');
     if (cb && !cb.checked) days.push(i);
-    if (times[0] && times[1]) workHours[i] = { open: times[0].value, close: times[1].value };
+    if (times[0] && times[1]) workHours[i] = { start: times[0].value, end: times[1].value, open: !!(cb && cb.checked) };
   });
   await set(ref(db, 'settings/' + CU.uid + '/closedDays'), days);
   await set(ref(db, 'settings/' + CU.uid + '/workHours'), workHours);
@@ -2440,6 +2487,24 @@ window.handleNotifClick = function(notifId, type, apptId, fromUid) {
   }
 }
 
+// ═══ AVATAR MINI MENU ═══
+window.togAvMenu = function(e) {
+  e.stopPropagation();
+  const menu = g('av-menu');
+  if (menu.style.display !== 'none') { menu.style.display = 'none'; return; }
+  const rect = e.currentTarget.getBoundingClientRect();
+  menu.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+  menu.style.right = (window.innerWidth - rect.right) + 'px';
+  menu.style.left = 'auto';
+  menu.style.display = 'block';
+  setTimeout(() => {
+    document.addEventListener('click', function handler(ev) {
+      if (!menu.contains(ev.target)) { menu.style.display = 'none'; document.removeEventListener('click', handler); }
+    });
+  }, 10);
+}
+window.closeAvMenu = function() { const m = g('av-menu'); if (m) m.style.display = 'none'; }
+
 // ═══ PROFILE PAGE ═══
 function loadProfilePage() {
   if (!UD) return;
@@ -2450,7 +2515,7 @@ function loadProfilePage() {
   const pname = g('prof-name'); if (pname) pname.value = UD.name || '';
   const pphone = g('prof-phone'); if (pphone) pphone.value = UD.phone || '';
   const pemail = g('prof-email'); if (pemail) pemail.value = UD.email || '';
-  const ppic = g('prof-pic-url'); if (ppic) ppic.value = UD.profilePicUrl || '';
+  window._profPicBase64 = null; // Reset pending pic on page load
   // Avatar
   const av = g('prof-av-big');
   if (av) {
@@ -2475,8 +2540,9 @@ window.saveProfile = async function() {
   const data = {
     name: g('prof-name').value.trim(),
     phone: g('prof-phone').value.trim(),
-    profilePicUrl: g('prof-pic-url').value.trim()
   };
+  if (window._profPicBase64) data.profilePicUrl = window._profPicBase64;
+  else if (UD?.profilePicUrl) data.profilePicUrl = UD.profilePicUrl;
   if (!data.name) { toast('⚠️ שם לא יכול להיות ריק'); return; }
   try {
     await update(ref(db, 'users/' + CU.uid), data);
@@ -2606,7 +2672,8 @@ async function checkForReviewRequests() {
     const nowTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
     snap.forEach(async c => {
       const a = c.val();
-      if (a.clientId !== CU.uid || a.status !== 'completed') return;
+      if (a.clientId !== CU.uid) return;
+      if (a.status !== 'completed' && a.status !== 'confirmed') return;
       // Check if past
       if (a.date > nowStr || (a.date === nowStr && a.time >= nowTime)) return;
       // Check if review already sent
@@ -2629,7 +2696,7 @@ async function checkForReviewRequests() {
 // Start review polling after 30s to let app load
 setTimeout(() => {
   checkForReviewRequests();
-  setInterval(checkForReviewRequests, 5 * 60 * 1000);
+  setInterval(checkForReviewRequests, 10 * 60 * 1000);
 }, 30000);
 </script>
 </body>
