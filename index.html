@@ -366,6 +366,34 @@ textarea.inp{resize:vertical;min-height:70px}
 .toast.show{display:block;animation:tin .3s ease}
 @keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
+/* STAR RATING */
+.stars{display:flex;gap:6px;font-size:30px;cursor:pointer;margin:10px 0;direction:ltr}
+.star{color:rgba(255,255,255,.2);transition:color .15s;line-height:1}
+.star.on{color:var(--amber)}
+.rev-card{background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--bd)}
+.rev-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.rev-name{font-size:13px;font-weight:600}
+.rev-date{font-size:11px;color:var(--w50)}
+.rev-stars{font-size:14px;color:var(--amber)}
+.rev-txt{font-size:13px;color:var(--w80);line-height:1.5;margin-top:6px}
+.avg-stars{font-size:18px;font-weight:700;color:var(--amber)}
+
+/* PROFILE PAGE */
+#profile-page{background:var(--bg);padding:24px;min-height:100vh}
+.prof-wrap{max-width:600px;margin:0 auto}
+.prof-av-big{width:90px;height:90px;border-radius:50%;background:var(--p);display:flex;align-items:center;justify-content:center;font-size:34px;border:3px solid var(--p3);margin:0 auto 16px;overflow:hidden;cursor:pointer;flex-shrink:0}
+.prof-av-big img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+
+/* BIZ PROFILE TABS */
+.bp-tabs{display:flex;gap:0;border-bottom:1px solid var(--bd);margin:0 24px 20px;overflow-x:auto}
+.bp-tab{padding:10px 20px;font-size:14px;font-weight:500;cursor:pointer;color:var(--w50);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.bp-tab.active{color:var(--p3);border-bottom-color:var(--p3)}
+.bp-section{display:none}.bp-section.active{display:block}
+
+/* CALENDAR DYNAMIC */
+.cd.past{color:rgba(255,255,255,.18);cursor:default;pointer-events:none}
+.cd.empty{background:none;pointer-events:none}
+
 /* NOTIFICATIONS */
 .notif-btn{position:relative;background:none;border:none;font-size:20px;cursor:pointer;padding:4px 6px;color:var(--w50);transition:color .15s;line-height:1;font-family:'Heebo',sans-serif}
 .notif-btn:hover{color:var(--w)}
@@ -498,7 +526,7 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="nright">
       <span class="nav-badge" id="nb1">לקוח</span>
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na1" style="background:var(--p)" onclick="togSwPanel()">?<div class="av-dot"></div></div>
+      <div class="nav-av" id="na1" style="background:var(--p)" onclick="goPage('profile-page')">?<div class="av-dot"></div></div>
       <button class="btnout" onclick="doLogout()">יציאה</button>
     </div>
   </nav>
@@ -534,7 +562,7 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="ncenter"><button class="nlink" onclick="goPage('main-page')">← חזרה</button></div>
     <div class="nright">
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na2" style="background:var(--p)" onclick="togSwPanel()">?</div>
+      <div class="nav-av" id="na2" style="background:var(--p)" onclick="goPage('profile-page')">?</div>
     </div>
   </nav>
   <div class="pcov" id="biz-cover" style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%)">
@@ -562,9 +590,15 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="sw"><div class="sring" style="background:linear-gradient(135deg,#10b981,#7c3aed)"><div class="sinn">🏆</div></div><div class="slbl">פרס</div></div>
     <div class="sw"><div class="sring" style="background:linear-gradient(135deg,#f59e0b,#9333ea)"><div class="sinn">🎉</div></div><div class="slbl">מבצע</div></div>
   </div>
-  <div style="padding:0 24px 16px;font-size:15px;font-weight:700">📸 פיד העסק</div>
-  <div class="feedwrap" id="profile-feed-posts">
+  <div class="bp-tabs">
+    <div class="bp-tab active" id="bpt-posts" onclick="switchBizTab('posts')">📸 פוסטים</div>
+    <div class="bp-tab" id="bpt-reviews" onclick="switchBizTab('reviews')">⭐ ביקורות</div>
+  </div>
+  <div class="feedwrap bp-section active" id="profile-feed-posts">
     <div style="text-align:center;padding:30px;color:var(--w50)">טוען פוסטים...</div>
+  </div>
+  <div class="feedwrap bp-section" id="profile-reviews-section">
+    <div style="text-align:center;padding:30px;color:var(--w50)">טוען ביקורות...</div>
   </div>
 </div>
 
@@ -575,7 +609,7 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="ncenter"><button class="nlink" onclick="goPage('biz-profile')">← חזרה לפרופיל</button></div>
     <div class="nright">
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na3" style="background:var(--p)" onclick="togSwPanel()">?</div>
+      <div class="nav-av" id="na3" style="background:var(--p)" onclick="goPage('profile-page')">?</div>
     </div>
   </nav>
   <div style="padding:24px">
@@ -597,13 +631,9 @@ textarea.inp{resize:vertical;min-height:70px}
       <div class="calgrid">
         <div class="calcard">
           <div class="ccttl">בחרו תאריך</div>
-          <div class="calh"><button class="cnav">→</button><span>יוני 2026</span><button class="cnav">←</button></div>
+          <div class="calh"><button class="cnav" onclick="navCal(1)">→</button><span id="cal-month-label">טוען...</span><button class="cnav" onclick="navCal(-1)">←</button></div>
           <div class="cdh"><span>א׳</span><span>ב׳</span><span>ג׳</span><span>ד׳</span><span>ה׳</span><span>ו׳</span><span>ש׳</span></div>
-          <div class="cdays">
-            <div class="cd dis">1</div><div class="cd has" onclick="selDay(this,'2')">2</div><div class="cd" onclick="selDay(this,'3')">3</div><div class="cd" onclick="selDay(this,'4')">4</div><div class="cd today" onclick="selDay(this,'5')">5</div><div class="cd" onclick="selDay(this,'6')">6</div><div class="cd dis">7</div>
-            <div class="cd dis">8</div><div class="cd" onclick="selDay(this,'9')">9</div><div class="cd has" onclick="selDay(this,'10')">10</div><div class="cd" onclick="selDay(this,'11')">11</div><div class="cd has" onclick="selDay(this,'12')">12</div><div class="cd" onclick="selDay(this,'13')">13</div><div class="cd dis">14</div>
-            <div class="cd dis">15</div><div class="cd" onclick="selDay(this,'16')">16</div><div class="cd" onclick="selDay(this,'17')">17</div><div class="cd" onclick="selDay(this,'18')">18</div><div class="cd" onclick="selDay(this,'19')">19</div><div class="cd" onclick="selDay(this,'20')">20</div><div class="cd dis">21</div>
-          </div>
+          <div class="cdays" id="booking-cdays"></div>
         </div>
         <div class="calcard">
           <div class="ccttl">שעות פנויות – <span id="dl">5/6</span></div>
@@ -618,7 +648,9 @@ textarea.inp{resize:vertical;min-height:70px}
         <div class="crow2"><span class="ckey">תאריך</span><span id="conf-date">—</span></div>
         <div class="crow2"><span class="ckey">שעה</span><span id="conf-time">--</span></div>
         <div class="crow2"><span class="ckey">כתובת</span><span id="conf-addr">—</span></div>
-        <button class="btnp" style="margin-top:16px" onclick="confirmBook()">✅ קבע תור</button>
+        <label class="ilbl" style="margin-top:12px">הערות לבעל העסק (אופציונלי)</label>
+        <textarea class="inp" id="book-notes" placeholder="כל מידע שחשוב שבעל העסק ידע..." style="min-height:60px;margin-bottom:0"></textarea>
+        <button class="btnp" style="margin-top:12px" onclick="confirmBook()">✅ קבע תור</button>
       </div>
       <div id="bsc" class="bconf hidden" style="text-align:center;border-color:var(--green)">
         <div style="font-size:50px;margin-bottom:12px">🎉</div>
@@ -641,7 +673,7 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="nright">
       <span class="nav-badge" style="color:var(--p3)">בעל עסק</span>
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na4" style="background:var(--p2)" onclick="togSwPanel()">?<div class="av-dot"></div></div>
+      <div class="nav-av" id="na4" style="background:var(--p2)" onclick="goPage('profile-page')">?<div class="av-dot"></div></div>
       <button class="btnout" onclick="doLogout()">יציאה</button>
     </div>
   </nav>
@@ -755,7 +787,7 @@ textarea.inp{resize:vertical;min-height:70px}
         <div class="cbox">
           <div class="cbox-b" style="padding:0">
             <table class="dtbl">
-              <thead><tr><th>לקוח</th><th>טלפון</th><th>תאריך</th><th>שעה</th><th>שירות</th><th>סטטוס</th><th>פעולות</th></tr></thead>
+              <thead><tr><th>לקוח</th><th>טלפון</th><th>תאריך</th><th>שעה</th><th>שירות</th><th>הערות</th><th>סטטוס</th><th>פעולות</th></tr></thead>
               <tbody id="appts-tb"></tbody>
             </table>
           </div>
@@ -867,7 +899,7 @@ textarea.inp{resize:vertical;min-height:70px}
     <div class="nright">
       <span class="nav-badge" id="nb2">לקוח</span>
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na5" style="background:var(--p)" onclick="togSwPanel()">?<div class="av-dot"></div></div>
+      <div class="nav-av" id="na5" style="background:var(--p)" onclick="goPage('profile-page')">?<div class="av-dot"></div></div>
       <button class="btnout" onclick="doLogout()">יציאה</button>
     </div>
   </nav>
@@ -902,7 +934,7 @@ textarea.inp{resize:vertical;min-height:70px}
     </div>
     <div class="nright">
       <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
-      <div class="nav-av" id="na6" style="background:var(--p2)" onclick="togSwPanel()">?</div>
+      <div class="nav-av" id="na6" style="background:var(--p2)" onclick="goPage('profile-page')">?</div>
       <button class="btnout" onclick="doLogout()">יציאה</button>
     </div>
   </nav>
@@ -1014,6 +1046,27 @@ textarea.inp{resize:vertical;min-height:70px}
   </div>
 </div>
 
+<!-- REVIEW MODAL -->
+<div class="mov" id="m-review">
+  <div class="modal">
+    <button class="mclose" onclick="closeM('m-review')">×</button>
+    <div class="mtitle">⭐ השאר ביקורת</div>
+    <input type="hidden" id="rev-biz-id"/>
+    <div id="rev-biz-name-lbl" style="font-size:15px;font-weight:600;margin-bottom:6px"></div>
+    <div class="stars" id="rev-stars" onclick="setRevStar(event)">
+      <span class="star" data-v="1">★</span>
+      <span class="star" data-v="2">★</span>
+      <span class="star" data-v="3">★</span>
+      <span class="star" data-v="4">★</span>
+      <span class="star" data-v="5">★</span>
+    </div>
+    <input type="hidden" id="rev-rating" value="0"/>
+    <label class="ilbl">תיאור (אופציונלי)</label>
+    <textarea class="inp" id="rev-text" placeholder="ספרו על החוויה שלכם..."></textarea>
+    <button class="btnp" onclick="submitReview()">שלח ביקורת ⭐</button>
+  </div>
+</div>
+
 <div class="toast" id="the-toast"></div>
 
 <!-- NOTIFICATIONS PANEL -->
@@ -1024,6 +1077,48 @@ textarea.inp{resize:vertical;min-height:70px}
   </div>
   <div class="notif-scroll" id="notif-list">
     <div class="notif-empty">אין התראות</div>
+  </div>
+</div>
+
+<!-- PERSONAL PROFILE PAGE -->
+<div class="page" id="profile-page">
+  <nav class="nb">
+    <div class="nlogo" onclick="goPage('main-page')">Bookly<span>.</span></div>
+    <div class="ncenter"><button class="nlink" id="prof-back-btn" onclick="goPage('main-page')">← חזרה</button></div>
+    <div class="nright">
+      <button class="notif-btn" onclick="togNotifPanel()" title="התראות">🔔<span class="notif-badge"></span></button>
+      <button class="btnout" onclick="doLogout()">יציאה</button>
+    </div>
+  </nav>
+  <div style="padding:24px">
+    <div class="prof-wrap">
+      <div class="prof-av-big" id="prof-av-big" onclick="promptPicUrl()">?</div>
+      <div style="text-align:center;font-size:13px;color:var(--w50);margin-bottom:24px">לחץ על התמונה לשינוי</div>
+      <div class="cbox" style="margin-bottom:16px">
+        <div class="cbox-h">פרטים אישיים</div>
+        <div class="cbox-b">
+          <label class="ilbl">שם מלא</label><input class="inp" id="prof-name" placeholder="שם מלא"/>
+          <label class="ilbl">טלפון</label><input class="inp" id="prof-phone" placeholder="05X-XXXXXXX"/>
+          <label class="ilbl">אימייל</label><input class="inp" id="prof-email" type="email" placeholder="mail@example.com"/>
+          <label class="ilbl">כתובת URL לתמונת פרופיל</label><input class="inp" id="prof-pic-url" placeholder="https://..."/>
+          <button class="btnp" onclick="saveProfile()">💾 שמור פרטים</button>
+        </div>
+      </div>
+      <div class="cbox" id="prof-biz-box" style="display:none">
+        <div class="cbox-h">פרטי העסק</div>
+        <div class="cbox-b">
+          <label class="ilbl">שם העסק</label><input class="inp" id="prof-biz-name" placeholder="שם העסק"/>
+          <label class="ilbl">מקצוע</label>
+          <select class="inp" id="prof-biz-prof"><option>ספר</option><option>קוסמטיקאית</option><option>ספרות נשים</option><option>מסאז'</option><option>ציפורניים</option><option>אחר</option></select>
+          <label class="ilbl">כתובת עסק</label><input class="inp" id="prof-biz-addr"/>
+          <label class="ilbl">טלפון עסק</label><input class="inp" id="prof-biz-ph"/>
+          <label class="ilbl">כתובת URL לבאנר פיד</label><input class="inp" id="prof-biz-banner" placeholder="https://..."/>
+          <label class="ilbl">תיאור העסק</label>
+          <textarea class="inp" id="prof-biz-bio" placeholder="ספרו קצת על העסק..."></textarea>
+          <button class="btnp" onclick="saveBizDetailsFromProfile()">💾 שמור פרטי עסק</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1341,27 +1436,32 @@ async function doQuickSwitch() {
 async function loadBizGrid() {
   const snap = await get(ref(db, 'users'));
   const grid = g('biz-grid-main'); if (!grid) return;
-  let cards = '';
   const emojis = {ספר:'✂️',קוסמטיקאית:'💅','ספרות נשים':'👩‍🦱',"מסאז'":'💆',ציפורניים:'💄'};
   const colors = ['linear-gradient(135deg,#1e1b4b,#312e81)','linear-gradient(135deg,#1a1a2e,#4a1942)','linear-gradient(135deg,#1e1b4b,#1e3a5f)','linear-gradient(135deg,#2d1b4e,#4c1d95)'];
-  let i = 0;
+  let businesses = [];
   if (snap.exists()) {
-    snap.forEach(c => {
-      const u = c.val();
-      if (u.role === 'business') {
-        const em = emojis[u.profession] || '🏪';
-        cards += `<div class="bcard" onclick="openBizProfile('${c.key}')">
-          <div class="bcov" style="background:${colors[i%4]}">${em}<div class="bcov-verified">✓</div></div>
-          <div class="bbody"><div class="bname">${u.bizName||'עסק'}</div>
-          <div class="bcat">${em} ${u.profession||'שירות'} · ${(u.bizAddress||'').split(',').pop()||'ישראל'}</div>
-          <div class="bfoot"><span class="bstars">★ 4.9</span>
-          <button class="bbtn" onclick="event.stopPropagation();openBizProfile('${c.key}');setTimeout(()=>goPage('booking-page'),100)">קבע תור</button></div></div></div>`;
-        i++;
-      }
-    });
+    snap.forEach(c => { const u = c.val(); if (u.role === 'business') businesses.push({id:c.key,...u}); });
   }
-  if (!cards) cards = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--w50)">אין עסקים רשומים עדיין. <span style="color:var(--p3);cursor:pointer" onclick="doLogout()">הצטרפו עכשיו ←</span></div>`;
-  grid.innerHTML = cards;
+  if (businesses.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--w50)">אין עסקים רשומים עדיין. <span style="color:var(--p3);cursor:pointer" onclick="doLogout()">הצטרפו עכשיו ←</span></div>`;
+    return;
+  }
+  // Render initial grid (without ratings)
+  grid.innerHTML = businesses.map((u, i) => {
+    const em = emojis[u.profession] || '🏪';
+    return `<div class="bcard" onclick="openBizProfile('${u.id}')">
+      <div class="bcov" style="background:${colors[i%4]}">${em}<div class="bcov-verified">✓</div></div>
+      <div class="bbody"><div class="bname">${u.bizName||'עסק'}</div>
+      <div class="bcat">${em} ${u.profession||'שירות'} · ${(u.bizAddress||'').split(',').pop()||'ישראל'}</div>
+      <div class="bfoot"><span class="bstars" id="bst-${u.id}">★ ...</span>
+      <button class="bbtn" onclick="event.stopPropagation();openBizProfile('${u.id}');setTimeout(()=>goPage('booking-page'),100)">קבע תור</button></div></div></div>`;
+  }).join('');
+  // Load ratings asynchronously
+  businesses.forEach(async u => {
+    const avg = await loadAvgRatingForBiz(u.id);
+    const el = g('bst-' + u.id);
+    if (el) el.textContent = avg ? `★ ${avg}` : '★ חדש';
+  });
 }
 
 window.openBizProfile = async function(uid) {
@@ -1375,6 +1475,11 @@ window.openBizProfile = async function(uid) {
   g('bp-addr').textContent = '📍 ' + (u.bizAddress||'');
   g('bp-phone').textContent = '📞 ' + (u.bizPhone || u.phone || '');
   g('biz-avatar').textContent = em;
+  // Reset tabs to posts
+  document.querySelectorAll('.bp-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.bp-section').forEach(s => s.classList.remove('active'));
+  g('bpt-posts').classList.add('active');
+  g('profile-feed-posts').classList.add('active');
   window._viewingBizId = uid;
   window._viewingBiz = {
     id: uid,
@@ -1384,6 +1489,11 @@ window.openBizProfile = async function(uid) {
     profession: u.profession || '',
     emoji: em
   };
+  // Load avg rating for profile page
+  loadAvgRatingForBiz(uid).then(avg => {
+    const starsEl = document.querySelector('#biz-profile .pmeta span:last-child');
+    if (starsEl) starsEl.textContent = avg ? '★ ' + avg : '★ חדש';
+  });
   goPage('biz-profile');
   loadBizProfilePosts(uid);
 }
@@ -1459,21 +1569,28 @@ async function loadDash() {
     const thSnap = await get(ref(db, 'settings/' + CU.uid + '/badThreshold'));
     if (thSnap.exists()) window._badPointsThreshold = thSnap.val();
     const cdSnap = await get(ref(db, 'settings/' + CU.uid + '/closedDays'));
-    if (cdSnap.exists()) window._closedDays = cdSnap.val();
+    if (cdSnap.exists()) {
+      window._closedDays = cdSnap.val();
+      // Pre-check toggles
+      document.querySelectorAll('#d-settings .srow').forEach((row, i) => {
+        const cb = row.querySelector('input[type=checkbox]');
+        if (cb) cb.checked = !window._closedDays.includes(i);
+      });
+    }
+    const whSnap = await get(ref(db, 'settings/' + CU.uid + '/workHours'));
+    if (whSnap.exists()) {
+      const wh = whSnap.val();
+      window._bizWorkHours = wh;
+      // Pre-fill time inputs
+      document.querySelectorAll('#d-settings .srow').forEach((row, i) => {
+        const times = row.querySelectorAll('input[type=time]');
+        if (times[0] && times[1] && wh[i]) { times[0].value = wh[i].open || '09:00'; times[1].value = wh[i].close || '18:00'; }
+      });
+    }
   } catch(e) {}
 
   // Calendar week
   renderWeekCal();
-  const times = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
-  g('wcal-rows').innerHTML = times.map(t => {
-    const slot = todayA.find(a => a.time === t);
-    return `<div class="wgrid">
-      <div class="wt">${t}</div>
-      <div class="wc"></div><div class="wc"></div><div class="wc"></div>
-      <div class="wc tc">${slot ? `<div class="ap aok" onclick="editAppt('${slot.id}')">${slot.clientName}</div>` : ''}</div>
-      <div class="wc"></div><div class="wc"></div>
-    </div>`;
-  }).join('');
 
   // Clients
   renderClientsTable(all, snap);
@@ -1484,7 +1601,7 @@ function renderApptsTable(appts) {
   const filtered = filter === 'all' ? appts : appts.filter(a => a.status === filter);
   const tb = g('appts-tb'); if (!tb) return;
   if (filtered.length === 0) {
-    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--w50)">אין תורים · <span style="color:var(--p3);cursor:pointer" onclick="openM(\'m-appt\')">הוסף תור</span></td></tr>';
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--w50)">אין תורים · <span style="color:var(--p3);cursor:pointer" onclick="openM(\'m-appt\')">הוסף תור</span></td></tr>';
     return;
   }
   const sm = {confirmed:'bok confirmed',pending:'bpnd pending',completed:'bdone completed',cancelled:'bcancel cancelled'};
@@ -1496,6 +1613,7 @@ function renderApptsTable(appts) {
       <td>${a.date||'—'}</td>
       <td>${a.time||'—'}</td>
       <td>${a.service||'—'}</td>
+      <td style="max-width:140px;font-size:12px;color:var(--w50)">${a.clientNotes||a.notes||'—'}</td>
       <td><span class="sbadge ${sm[a.status]||'bpnd'}">${sl[a.status]||'ממתין'}</span></td>
       <td>
         <button class="abtn g" onclick="markDone('${a.id}')">✓</button>
@@ -1607,9 +1725,9 @@ window.updateAppt = async function() {
     // שלח התראה ללקוח
     const appt = window._allAppts.find(a => a.id === id);
     if (appt?.clientId) {
-      const statusLabels = {confirmed:'אושר',pending:'ממתין',completed:'הושלם',cancelled:'בוטל'};
-      const lbl = statusLabels[newStatus] || newStatus;
-      try { await sendNotification(appt.clientId, `התור שלך ב-${UD?.bizName||'העסק'} ב-${g('ea-date').value} ${g('ea-time').value} עודכן: ${lbl}`, 'appt_update'); } catch(e) {}
+      const statusLabels = {confirmed:'אישר',pending:'עדכן',completed:'השלים',cancelled:'ביטל'};
+      const lbl = statusLabels[newStatus] || 'עדכן';
+      try { await sendNotification(appt.clientId, `העסק ${UD?.bizName||'העסק'} ${lbl} את התור שלך ב-${g('ea-date').value} בשעה ${g('ea-time').value}`, 'appt_update', id); } catch(e) {}
     }
     closeM('m-edit-appt'); toast('✅ התור עודכן!'); loadDash();
   } catch(e) { toast('⚠️ שגיאה'); }
@@ -1621,7 +1739,7 @@ window.cancelAppt = async function(id) {
     await update(ref(db,'appointments/'+id),{status:'cancelled'});
     toast('🗑️ התור בוטל');
     if (appt?.clientId) {
-      try { await sendNotification(appt.clientId, `התור שלך ב-${UD?.bizName||'העסק'} ב-${appt.date} ${appt.time} בוטל ❌`, 'appt_cancel'); } catch(e) {}
+      try { await sendNotification(appt.clientId, `העסק ${UD?.bizName||'העסק'} ביטל את התור שלך ב-${appt.date} בשעה ${appt.time}`, 'appt_cancel', id); } catch(e) {}
       const addPt = confirm('האם להוסיף נקודה רעה ל-' + (appt.clientName||'לקוח') + '?');
       if (addPt) await addBadPoint(appt.clientId, appt.clientName);
     }
@@ -1633,7 +1751,7 @@ window.markDone = async function(id) {
     await update(ref(db,'appointments/'+id),{status:'completed'});
     const appt = window._allAppts.find(a => a.id === id);
     if (appt?.clientId) {
-      try { await sendNotification(appt.clientId, `התור שלך ב-${UD?.bizName||'העסק'} ב-${appt.date} ${appt.time} סומן כהושלם ✅`, 'appt_done'); } catch(e) {}
+      try { await sendNotification(appt.clientId, `העסק ${UD?.bizName||'העסק'} אישר שהתור שלך ב-${appt.date} בשעה ${appt.time} הושלם ✅`, 'appt_done', id); } catch(e) {}
     }
     toast('✅ סומן כהושלם!'); loadDash();
   } catch(e) { toast('⚠️ שגיאה'); }
@@ -1645,25 +1763,27 @@ window.confirmBook = async function() {
   const date = g('conf-date').textContent, time = g('conf-time').textContent;
   if (time === '--') { toast('⚠️ נא לבחור שעה'); return; }
   const biz = window._viewingBiz || {};
+  const clientNotes = (g('book-notes')?.value || '').trim();
   try {
-    await push(ref(db,'appointments'), {
+    const newRef = await push(ref(db,'appointments'), {
       clientId: CU.uid, clientName: UD?.name||'לקוח',
       clientPhone: UD?.phone||'',
       businessId: biz.id || window._viewingBizId || 'demo',
       businessName: biz.name || 'עסק',
       businessAddress: biz.address || '',
-      date, time, service: biz.profession || 'שירות', status:'confirmed', createdAt:Date.now()
+      date, time, service: biz.profession || 'שירות',
+      clientNotes, status:'confirmed', createdAt:Date.now()
     });
     // עדכן סטטיסטיקות לקוח
     try {
       const stats = await getClientStats(biz.id, CU.uid);
-      const noteRef = ref(db, 'clientStats/' + (biz.id||'demo') + '/' + CU.uid);
-      await set(noteRef, {name:UD?.name, booked:stats.booked+1, cancelled:stats.cancelled, lastBooking:date});
+      await set(ref(db, 'clientStats/' + (biz.id||'demo') + '/' + CU.uid), {name:UD?.name, booked:stats.booked+1, cancelled:stats.cancelled, lastBooking:date});
     } catch(e) {}
     // שלח התראה לבעל העסק
     if (biz.id && biz.id !== 'demo') {
-      try { await sendNotification(biz.id, `${UD?.name||'לקוח'} קבע תור לתאריך ${date} בשעה ${time}`, 'new_booking'); } catch(e) {}
+      try { await sendNotification(biz.id, `${UD?.name||'לקוח'} קבע תור ב-${date} בשעה ${time}`, 'new_booking', newRef?.key); } catch(e) {}
     }
+    if (g('book-notes')) g('book-notes').value = '';
     g('bcc').classList.add('hidden'); g('bsc').classList.remove('hidden');
     toast('✅ התור נקבע!'); loadClientData();
   } catch(e) { toast('⚠️ שגיאה: ' + e.message); }
@@ -1671,32 +1791,22 @@ window.confirmBook = async function() {
 
 // ── טעינת עמוד קביעת תור עם נתונים אמיתיים ──
 async function loadBookingPage() {
-  // Load closed days for this business
   const bizId = (window._viewingBiz||{}).id;
+  // Load closed days + work hours for this business
   let closedDays = [6]; // default: שבת
+  let workHours = {};
   if (bizId) {
     try {
       const cdSnap = await get(ref(db, 'settings/' + bizId + '/closedDays'));
       if (cdSnap.exists()) closedDays = cdSnap.val();
     } catch(e) {}
+    try {
+      const whSnap = await get(ref(db, 'settings/' + bizId + '/workHours'));
+      if (whSnap.exists()) workHours = whSnap.val();
+    } catch(e) {}
   }
   window._bookingClosedDays = closedDays;
-  // Mark closed days in calendar
-  const calDays = document.querySelectorAll('#booking-page .cd');
-  calDays.forEach(cd => {
-    const dayText = cd.textContent.trim();
-    if (!dayText || cd.classList.contains('dis')) return;
-    // Calculate day of week (June 2026)
-    const dayNum = parseInt(dayText);
-    if (isNaN(dayNum)) return;
-    const date = new Date(2026, 5, dayNum);
-    const dow = date.getDay();
-    if (closedDays.includes(dow)) {
-      cd.classList.add('closed');
-      cd.onclick = null;
-      cd.removeAttribute('onclick');
-    }
-  });
+  window._bizWorkHours = workHours;
   // Check if client is blocked
   if (bizId && CU) {
     try {
@@ -1730,29 +1840,45 @@ async function loadBookingPage() {
       });
     }
   } catch(e) {}
-  // Set calendar year/month context and show today's slots
+  // Set calendar year/month context and render dynamic calendar
   const now = new Date();
   window._calYear = now.getFullYear();
   window._calMonth = now.getMonth() + 1;
-  loadTimeSlots(String(now.getDate()));
+  renderBookingCal();
+  // Reset time slots to waiting state
+  const grid = g('time-slots-grid');
+  if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--w50)">בחרו תאריך כדי לראות שעות פנויות</div>';
+  const dl = g('dl'); if (dl) dl.textContent = '';
 }
 
 function loadTimeSlots(day) {
   const grid = g('time-slots-grid');
   if (!grid) return;
-  // Build ISO date from calendar context (year/month stored in window._calYear/_calMonth)
   const yr = window._calYear || new Date().getFullYear();
   const mo = window._calMonth || (new Date().getMonth() + 1);
   const d = parseInt(day);
   const isoDate = yr + '-' + String(mo).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-  const times = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'];
-  const busyTimes = (window._bizAppts || []).filter(a => a.date === isoDate).map(a => a.time);
-  grid.innerHTML = times.map(t => {
-    const isBusy = busyTimes.includes(t);
-    return '<div class="tsl' + (isBusy ? ' busy' : '') + '"' + (isBusy ? '' : ' onclick="selTime(this)"') + '>' + t + '</div>';
-  }).join('');
-  g('dl').textContent = d + '/' + mo;
-  g('conf-date').textContent = isoDate;
+  // Build slots from work hours for this day-of-week
+  const dow = new Date(yr, mo-1, d).getDay();
+  const wh = (window._bizWorkHours || {})[dow] || {open:'09:00', close:'18:00'};
+  const slots = [];
+  let [oh, om] = wh.open.split(':').map(Number);
+  const [ch, cm] = wh.close.split(':').map(Number);
+  while (oh * 60 + om < ch * 60 + cm) {
+    slots.push(String(oh).padStart(2,'0') + ':' + String(om).padStart(2,'0'));
+    om += 30; if (om >= 60) { oh++; om -= 60; }
+  }
+  if (slots.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--w50)">אין שעות זמינות ביום זה</div>';
+  } else {
+    const busyTimes = (window._bizAppts || []).filter(a => a.date === isoDate).map(a => a.time);
+    grid.innerHTML = slots.map(t => {
+      const isBusy = busyTimes.includes(t);
+      return '<div class="tsl' + (isBusy ? ' busy' : '') + '"' + (isBusy ? '' : ' onclick="selTime(this)"') + '>' + t + '</div>';
+    }).join('');
+  }
+  const dl = g('dl'); if (dl) dl.textContent = d + '/' + mo;
+  const cd = g('conf-date'); if (cd) cd.textContent = isoDate;
 }
 
 window.cancelMyAppt = async function(id, btn) {
@@ -1876,6 +2002,7 @@ window.goPage = function(id) {
     if (UD) { g('feed-title').textContent = '📸 הפיד של ' + (UD.bizName||'העסק שלי'); }
   }
   if (id==='main-page' && UD?.role==='client') loadBizGrid();
+  if (id==='profile-page') loadProfilePage();
 }
 
 window.swD = function(el, id) {
@@ -2078,13 +2205,19 @@ async function loadClosedDays(bizId) {
 window.saveClosedDays = async function() {
   if (!CU) return;
   const days = [];
+  const workHours = {};
+  // Day mapping: rows are Sun=0 Mon=1 Tue=2 Wed=3 Thu=4 Fri=5 Sat=6
   document.querySelectorAll('#d-settings .srow').forEach((row, i) => {
     const cb = row.querySelector('input[type=checkbox]');
+    const times = row.querySelectorAll('input[type=time]');
     if (cb && !cb.checked) days.push(i);
+    if (times[0] && times[1]) workHours[i] = { open: times[0].value, close: times[1].value };
   });
   await set(ref(db, 'settings/' + CU.uid + '/closedDays'), days);
+  await set(ref(db, 'settings/' + CU.uid + '/workHours'), workHours);
   window._closedDays = days;
-  toast('✅ ימי עבודה נשמרו!');
+  window._bizWorkHours = workHours;
+  toast('✅ הגדרות נשמרו!');
 }
 
 
@@ -2111,12 +2244,13 @@ window.toast = function(msg) {
 }
 
 // ═══ NOTIFICATIONS ═══
-async function sendNotification(toUid, message, type) {
+async function sendNotification(toUid, message, type, apptId) {
   if (!CU || !toUid) return;
   await push(ref(db, 'notifications/' + toUid), {
     message, type,
     from: CU.uid,
     fromName: UD?.bizName || UD?.name || '',
+    apptId: apptId || null,
     read: false,
     createdAt: Date.now()
   });
@@ -2154,11 +2288,14 @@ function renderNotifPanel() {
     list.innerHTML = '<div class="notif-empty">אין התראות</div>';
     return;
   }
-  list.innerHTML = items.slice(0, 30).map(n => `
-    <div class="notif-item ${n.read ? '' : 'unread'}">
+  list.innerHTML = items.slice(0, 30).map(n => {
+    const isReview = n.type === 'review_request';
+    const hasNav = n.apptId || isReview;
+    return `<div class="notif-item ${n.read ? '' : 'unread'}" style="cursor:${hasNav?'pointer':'default'}" onclick="handleNotifClick('${n.id}','${n.type||''}','${n.apptId||''}','${n.from||''}')">
       <div style="font-weight:${n.read ? '400' : '600'}">${n.message}</div>
       <div style="font-size:11px;color:var(--w50);margin-top:3px">${new Date(n.createdAt).toLocaleString('he-IL')}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function markAllRead() {
@@ -2211,6 +2348,289 @@ async function loadBizProfilePosts(bizId) {
       </div>`).join('');
   } catch(e) { el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--w50)">שגיאה בטעינת פוסטים</div>'; }
 }
+
+// ═══ BIZ PROFILE TABS ═══
+window.switchBizTab = function(tab) {
+  document.querySelectorAll('.bp-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.bp-section').forEach(s => s.classList.remove('active'));
+  g('bpt-' + tab).classList.add('active');
+  if (tab === 'posts') g('profile-feed-posts').classList.add('active');
+  else if (tab === 'reviews') {
+    g('profile-reviews-section').classList.add('active');
+    loadBizReviews(window._viewingBizId);
+  }
+}
+
+// ═══ DYNAMIC BOOKING CALENDAR ═══
+function renderBookingCal() {
+  const yr = window._calYear;
+  const mo = window._calMonth;
+  const today = new Date();
+  const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  const monthNames = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  const lbl = g('cal-month-label');
+  if (lbl) lbl.textContent = monthNames[mo-1] + ' ' + yr;
+  const firstDow = new Date(yr, mo-1, 1).getDay();
+  const lastDay = new Date(yr, mo, 0).getDate();
+  const closedDays = window._bookingClosedDays || [];
+  const apptDays = new Set((window._bizAppts || []).map(a => a.date));
+  let html = '';
+  for (let i = 0; i < firstDow; i++) html += '<div class="cd empty"></div>';
+  for (let d = 1; d <= lastDay; d++) {
+    const isoDate = yr + '-' + String(mo).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const dow = new Date(yr, mo-1, d).getDay();
+    const isPast = isoDate < todayStr;
+    const isToday = isoDate === todayStr;
+    const isClosed = closedDays.includes(dow);
+    const hasAppt = apptDays.has(isoDate);
+    let cls = 'cd';
+    let click = '';
+    if (isPast) { cls += ' past'; }
+    else if (isClosed) { cls += ' closed'; }
+    else {
+      click = ` onclick="selDay(this,'${d}')"`;
+      if (hasAppt) cls += ' has';
+      if (isToday) cls += ' today';
+    }
+    html += `<div class="${cls}"${click}>${d}</div>`;
+  }
+  const cdays = g('booking-cdays');
+  if (cdays) cdays.innerHTML = html;
+}
+
+window.navCal = function(dir) {
+  // dir=-1 means go forward (next month), dir=1 means go back (prev month) due to RTL arrow direction
+  window._calMonth = (window._calMonth || new Date().getMonth()+1) - dir;
+  if (window._calMonth < 1) { window._calMonth = 12; window._calYear--; }
+  if (window._calMonth > 12) { window._calMonth = 1; window._calYear++; }
+  // Don't allow navigating to past months
+  const now = new Date();
+  if (window._calYear < now.getFullYear() || (window._calYear === now.getFullYear() && window._calMonth < now.getMonth()+1)) {
+    window._calYear = now.getFullYear(); window._calMonth = now.getMonth()+1;
+  }
+  renderBookingCal();
+  // Hide time slots when month changes
+  const grid = g('time-slots-grid');
+  if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--w50)">בחרו תאריך</div>';
+  g('bcc')?.classList.add('hidden');
+}
+
+// ═══ HANDLE NOTIFICATION CLICK ═══
+window.handleNotifClick = function(notifId, type, apptId, fromUid) {
+  document.getElementById('notif-panel').classList.remove('open');
+  if (type === 'review_request' && apptId && apptId !== 'null') {
+    // For review requests, apptId holds the businessId
+    const bizId = apptId;
+    get(ref(db, 'users/' + bizId)).then(snap => {
+      g('rev-biz-id').value = bizId;
+      if (snap.exists()) g('rev-biz-name-lbl').textContent = snap.val().bizName || 'העסק';
+    }).catch(()=>{});
+    g('rev-rating').value = '0';
+    document.querySelectorAll('#rev-stars .star').forEach(s => s.classList.remove('on'));
+    g('rev-text').value = '';
+    openM('m-review');
+  } else if (apptId && apptId !== 'null') {
+    // Navigate to relevant page to see appointment
+    if (UD?.role === 'business') {
+      goPage('dashboard-page');
+      setTimeout(() => { swD(document.querySelectorAll('.sbi')[2], 'd-appts'); }, 300);
+    } else {
+      goPage('client-page');
+    }
+  }
+}
+
+// ═══ PROFILE PAGE ═══
+function loadProfilePage() {
+  if (!UD) return;
+  const isBiz = UD.role === 'business';
+  const backBtn = g('prof-back-btn');
+  if (backBtn) backBtn.setAttribute('onclick', isBiz ? "goPage('dashboard-page')" : "goPage('main-page')");
+  // Personal info
+  const pname = g('prof-name'); if (pname) pname.value = UD.name || '';
+  const pphone = g('prof-phone'); if (pphone) pphone.value = UD.phone || '';
+  const pemail = g('prof-email'); if (pemail) pemail.value = UD.email || '';
+  const ppic = g('prof-pic-url'); if (ppic) ppic.value = UD.profilePicUrl || '';
+  // Avatar
+  const av = g('prof-av-big');
+  if (av) {
+    if (UD.profilePicUrl) av.innerHTML = `<img src="${UD.profilePicUrl}" alt="תמונה"/>`;
+    else av.textContent = (UD.bizName || UD.name || '?')[0].toUpperCase();
+  }
+  // Business box
+  const bizBox = g('prof-biz-box');
+  if (bizBox) bizBox.style.display = isBiz ? 'block' : 'none';
+  if (isBiz) {
+    const pbn = g('prof-biz-name'); if (pbn) pbn.value = UD.bizName || '';
+    const pbp = g('prof-biz-prof'); if (pbp) pbp.value = UD.profession || '';
+    const pba = g('prof-biz-addr'); if (pba) pba.value = UD.bizAddress || '';
+    const pbph = g('prof-biz-ph'); if (pbph) pbph.value = UD.bizPhone || '';
+    const pbb = g('prof-biz-banner'); if (pbb) pbb.value = UD.feedBannerUrl || '';
+    const pbio = g('prof-biz-bio'); if (pbio) pbio.value = UD.bio || '';
+  }
+}
+
+window.saveProfile = async function() {
+  if (!CU) return;
+  const data = {
+    name: g('prof-name').value.trim(),
+    phone: g('prof-phone').value.trim(),
+    profilePicUrl: g('prof-pic-url').value.trim()
+  };
+  if (!data.name) { toast('⚠️ שם לא יכול להיות ריק'); return; }
+  try {
+    await update(ref(db, 'users/' + CU.uid), data);
+    Object.assign(UD, data);
+    localStorage.setItem('bk_ud_' + CU.uid, JSON.stringify(UD));
+    // Update all navbars
+    const init = (UD.bizName || UD.name || '?')[0].toUpperCase();
+    document.querySelectorAll('.nav-av').forEach(a => {
+      if (UD.profilePicUrl) a.innerHTML = `<img src="${UD.profilePicUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>` + (a.querySelector('.av-dot') ? '<div class="av-dot"></div>' : '');
+      else a.innerHTML = init + (a.querySelector('.av-dot') ? '<div class="av-dot"></div>' : '');
+    });
+    const av = g('prof-av-big');
+    if (av) {
+      if (UD.profilePicUrl) av.innerHTML = `<img src="${UD.profilePicUrl}" alt="תמונה"/>`;
+      else av.textContent = init;
+    }
+    toast('✅ הפרטים נשמרו!');
+  } catch(e) { toast('⚠️ שגיאה: ' + e.message); }
+}
+
+window.saveBizDetailsFromProfile = async function() {
+  if (!CU || UD?.role !== 'business') return;
+  const data = {
+    bizName: g('prof-biz-name').value.trim(),
+    profession: g('prof-biz-prof').value,
+    bizAddress: g('prof-biz-addr').value.trim(),
+    bizPhone: g('prof-biz-ph').value.trim(),
+    feedBannerUrl: g('prof-biz-banner').value.trim(),
+    bio: g('prof-biz-bio').value.trim()
+  };
+  try {
+    await update(ref(db, 'users/' + CU.uid), data);
+    Object.assign(UD, data);
+    localStorage.setItem('bk_ud_' + CU.uid, JSON.stringify(UD));
+    toast('✅ פרטי העסק נשמרו!');
+  } catch(e) { toast('⚠️ שגיאה: ' + e.message); }
+}
+
+window.promptPicUrl = function() {
+  const url = prompt('הכנס כתובת URL לתמונת פרופיל:', UD?.profilePicUrl || '');
+  if (url !== null) {
+    const inp = g('prof-pic-url'); if (inp) inp.value = url;
+    const av = g('prof-av-big');
+    if (av) {
+      if (url) av.innerHTML = `<img src="${url}" alt="תמונה"/>`;
+      else av.textContent = (UD?.bizName || UD?.name || '?')[0].toUpperCase();
+    }
+  }
+}
+
+// ═══ REVIEWS SYSTEM ═══
+window.setRevStar = function(e) {
+  const star = e.target.closest('.star');
+  if (!star) return;
+  const val = parseInt(star.getAttribute('data-v'));
+  g('rev-rating').value = String(val);
+  document.querySelectorAll('#rev-stars .star').forEach((s,i) => {
+    s.classList.toggle('on', i < val);
+  });
+}
+
+window.submitReview = async function() {
+  if (!CU) { toast('⚠️ יש להתחבר קודם'); return; }
+  const bizId = g('rev-biz-id').value;
+  const rating = parseInt(g('rev-rating').value || '0');
+  const text = g('rev-text').value.trim();
+  if (!bizId) { toast('⚠️ שגיאה: אין עסק'); return; }
+  if (!rating) { toast('⚠️ נא לבחור דירוג'); return; }
+  try {
+    await set(ref(db, 'reviews/' + bizId + '/' + CU.uid), {
+      clientId: CU.uid, clientName: UD?.name || 'לקוח',
+      rating, text, createdAt: Date.now()
+    });
+    closeM('m-review');
+    toast('✅ הביקורת נשמרה! תודה ⭐');
+  } catch(e) { toast('⚠️ שגיאה: ' + e.message); }
+}
+
+async function loadBizReviews(bizId) {
+  const el = g('profile-reviews-section'); if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--w50)">טוען ביקורות...</div>';
+  try {
+    const snap = await get(ref(db, 'reviews/' + bizId));
+    if (!snap.exists()) {
+      el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--w50)">אין ביקורות עדיין</div>';
+      return;
+    }
+    let reviews = [];
+    snap.forEach(c => reviews.push({id:c.key,...c.val()}));
+    reviews.sort((a,b) => b.createdAt - a.createdAt);
+    const avg = (reviews.reduce((s,r) => s+r.rating, 0) / reviews.length).toFixed(1);
+    const stars = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
+    el.innerHTML = `<div style="text-align:center;padding:16px 0 20px">
+      <div class="avg-stars">${stars} ${avg}</div>
+      <div style="font-size:13px;color:var(--w50)">${reviews.length} ביקורות</div>
+    </div>` +
+    reviews.map(r => `
+      <div class="rev-card">
+        <div class="rev-meta">
+          <span class="rev-name">${r.clientName||'לקוח'}</span>
+          <span class="rev-date">${new Date(r.createdAt).toLocaleDateString('he-IL')}</span>
+        </div>
+        <div class="rev-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+        ${r.text ? `<div class="rev-txt">${r.text}</div>` : ''}
+      </div>`).join('');
+  } catch(e) { el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--w50)">שגיאה בטעינת ביקורות</div>'; }
+}
+
+async function loadAvgRatingForBiz(bizId) {
+  try {
+    const snap = await get(ref(db, 'reviews/' + bizId));
+    if (!snap.exists()) return null;
+    let sum = 0, count = 0;
+    snap.forEach(c => { sum += (c.val().rating || 0); count++; });
+    return count > 0 ? (sum/count).toFixed(1) : null;
+  } catch(e) { return null; }
+}
+
+// ═══ REVIEW REQUEST POLLING (every 5 min) ═══
+async function checkForReviewRequests() {
+  if (!CU || UD?.role !== 'client') return;
+  try {
+    const snap = await get(ref(db, 'appointments'));
+    if (!snap.exists()) return;
+    const now = new Date();
+    const nowStr = now.toISOString().slice(0,10);
+    const nowTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    snap.forEach(async c => {
+      const a = c.val();
+      if (a.clientId !== CU.uid || a.status !== 'completed') return;
+      // Check if past
+      if (a.date > nowStr || (a.date === nowStr && a.time >= nowTime)) return;
+      // Check if review already sent
+      const reviewKey = 'bk_rev_' + c.key;
+      if (localStorage.getItem(reviewKey)) return;
+      // Check if review already exists
+      try {
+        const revSnap = await get(ref(db, 'reviews/' + a.businessId + '/' + CU.uid));
+        if (revSnap.exists()) { localStorage.setItem(reviewKey, '1'); return; }
+      } catch(e) {}
+      // Send review request notification (to self)
+      localStorage.setItem(reviewKey, '1');
+      try {
+        await sendNotification(CU.uid, `איך היה התור אצל ${a.businessName||'העסק'}? השאר ביקורת ⭐`, 'review_request', a.businessId);
+      } catch(e) {}
+    });
+  } catch(e) {}
+}
+
+// Start review polling after 30s to let app load
+setTimeout(() => {
+  checkForReviewRequests();
+  setInterval(checkForReviewRequests, 5 * 60 * 1000);
+}, 30000);
 </script>
 </body>
 </html>
