@@ -1415,10 +1415,23 @@ function saveAccount(email, name, role, pass) {
   window._accounts = accounts;
 }
 window.togSwPanel = function() {
-  const p = g('sw-panel'); p.classList.toggle('open');
-  document.addEventListener('click', function handler(e) {
-    if (!p.contains(e.target) && !e.target.classList.contains('nav-av')) { p.classList.remove('open'); document.removeEventListener('click', handler); }
-  }, { once: false });
+  const p = g('sw-panel');
+  const isOpen = p.classList.contains('open');
+  if (isOpen) {
+    p.classList.remove('open');
+    return;
+  }
+  updateSwPanel();
+  p.classList.add('open');
+  // Use setTimeout to avoid catching the current click event
+  setTimeout(() => {
+    document.addEventListener('click', function handler(e) {
+      if (!p.contains(e.target) && !e.target.closest('.nav-av') && !e.target.closest('.sw-trigger')) {
+        p.classList.remove('open');
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 50);
 }
 function updateSwPanel() {
   const list = g('sw-users-list'); if (!list) return;
@@ -1660,7 +1673,8 @@ async function loadDash() {
             <div class="tl-name">${a.clientName||'לקוח'}</div>
             <div class="tl-svc">${a.service||'תספורת'} · ${a.clientPhone||''}</div>
             <div class="tl-acts">
-              <button class="abtn g" onclick="markDone('${a.id}')">✓ הושלם</button>
+              <button class="abtn g" style="display:${a.status==='pending'?'':'none'}" onclick="confirmApptNow('${a.id}')">✅ אשר</button>
+              <button class="abtn" onclick="markDone('${a.id}')">☑ הושלם</button>
               <button class="abtn" onclick="editAppt('${a.id}')">✏️ ערוך</button>
               <button class="abtn d" onclick="cancelAppt('${a.id}')">❌ בטל</button>
             </div>
@@ -1701,7 +1715,8 @@ function renderApptsTable(appts) {
       <td style="max-width:120px;font-size:12px;color:var(--w50)">${a.clientNotes||a.notes||'—'}</td>
       <td><span class="sbadge ${sm[a.status]||'bpnd'}">${sl[a.status]||'ממתין'}</span></td>
       <td onclick="event.stopPropagation()">
-        <button class="abtn g" onclick="markDone('${a.id}')">✓</button>
+        <button class="abtn g" style="display:${a.status==='pending'?'':'none'}" onclick="confirmApptNow('${a.id}')">✅ אשר</button>
+        <button class="abtn" onclick="markDone('${a.id}')">☑ הושלם</button>
         <button class="abtn" onclick="editAppt('${a.id}')">✏️</button>
         <button class="abtn d" onclick="cancelAppt('${a.id}')">❌</button>
       </td>
@@ -1866,8 +1881,14 @@ window.cancelAppt = async function(id) {
     toast('🗑️ התור בוטל');
     if (appt?.clientId) {
       try { await sendNotification(appt.clientId, `העסק ${UD?.bizName||'העסק'} ביטל את התור שלך ב-${appt.date} בשעה ${appt.time}`, 'appt_cancel', id); } catch(e) {}
-      const addPt = confirm('האם להוסיף נקודה רעה ל-' + (appt.clientName||'לקוח') + '?');
-      if (addPt) await addBadPoint(appt.clientId, appt.clientName);
+    }
+    // שאל נקודה רעה בנפרד
+    if (appt?.clientId) {
+      setTimeout(() => {
+        if (confirm('האם להוסיף נקודה רעה ל-' + (appt.clientName||'לקוח') + '?')) {
+          addBadPoint(appt.clientId, appt.clientName);
+        }
+      }, 100);
     }
   } catch(e) { toast('⚠️ שגיאה'); }
 }
@@ -1879,13 +1900,38 @@ window.markDone = async function(id) {
       try { await sendNotification(appt.clientId, `העסק ${UD?.bizName||'העסק'} אישר שהתור שלך ב-${appt.date} בשעה ${appt.time} הושלם ✅`, 'appt_done', id); } catch(e) {}
     }
     toast('✅ סומן כהושלם!');
+    // UI will auto-update via onValue listener
+  } catch(e) { toast('⚠️ שגיאה'); }
+}
+
+// Confirm appointment (pending → confirmed)
+window.confirmApptNow = async function(id) {
+  try {
+    const appt = window._allAppts.find(a => a.id === id);
+    await update(ref(db,'appointments/'+id),{status:'confirmed'});
+    if (appt?.clientId) {
+      try { await sendNotification(appt.clientId, `העסק ${UD?.bizName||'העסק'} אישר את התור שלך ב-${appt.date} בשעה ${appt.time} ✅`, 'appt_confirm', id); } catch(e) {}
+    }
+    toast('✅ התור אושר!');
   } catch(e) { toast('⚠️ שגיאה'); }
 }
 
 // ── CONFIRM BOOKING (CLIENT) ──
 window.confirmBook = async function() {
   if (!CU) { toast('⚠️ יש להתחבר קודם'); return; }
-  const date = g('conf-date').textContent, time = g('conf-time').textContent;
+  // Ensure date is in ISO format YYYY-MM-DD
+  let date = g('conf-date').textContent;
+  // Convert D/M/YYYY or D/M to ISO if needed
+  if (date && date.includes('/') && !date.match(/^\d{4}-/)) {
+    const parts = date.split('/');
+    if (parts.length >= 2) {
+      const yr = parts.length >= 3 ? parts[2] : new Date().getFullYear();
+      const mo = String(parts[1]).padStart(2,'0');
+      const dy = String(parts[0]).padStart(2,'0');
+      date = yr + '-' + mo + '-' + dy;
+    }
+  }
+  const time = g('conf-time').textContent;
   if (time === '--') { toast('⚠️ נא לבחור שעה'); return; }
   const biz = window._viewingBiz || {};
   const clientNotes = (g('book-notes')?.value || '').trim();
@@ -1926,7 +1972,7 @@ window.confirmBook = async function() {
 async function loadBookingPage() {
   const bizId = (window._viewingBiz||{}).id;
   // Load closed days + work hours for this business
-  let closedDays = [6]; // default: שבת
+  let closedDays = []; // ברירת מחדל: אין ימים סגורים
   let workHours = {};
   if (bizId) {
     try {
@@ -2252,19 +2298,17 @@ window.renderWeekCal = function() {
   const sun = new Date(base);
   sun.setDate(sun.getDate() - sun.getDay());
   const days = [];
-  const dayNames = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳'];
+  const dayNames = ['א\'','ב\'','ג\'','ד\'','ה\'','ו\''];
   for (let i=0;i<6;i++) {
     const d = new Date(sun);
     d.setDate(d.getDate()+i);
     days.push(d);
   }
-  // Update header
   const label = g('week-label');
   if (label) {
     const m = sun.toLocaleDateString('he-IL',{month:'long',year:'numeric'});
     label.textContent = window._weekOffset===0 ? 'השבוע · '+m : m;
   }
-  // Update week headers
   const heads = document.querySelectorAll('#d-cal .wh');
   if (heads.length >= 7) {
     for (let i=0;i<6;i++) {
@@ -2274,27 +2318,71 @@ window.renderWeekCal = function() {
       heads[i+1].style.color = isToday ? 'var(--p3)' : '';
     }
   }
-  // Render time rows
-  const times = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
-  const today = new Date().toISOString().split('T')[0];
   const myAppts = window._allAppts || [];
-  console.log('renderWeekCal: appts=', myAppts.length, 'sample dates=', myAppts.slice(0,3).map(a=>a.date));
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Normalize appointment date to ISO
+  function normalizeDate(d) {
+    if (!d) return '';
+    if (d.match(/^\d{4}-/)) return d; // already ISO
+    const parts = d.split('/');
+    if (parts.length === 3) {
+      return parts[2]+'-'+String(parts[1]).padStart(2,'0')+'-'+String(parts[0]).padStart(2,'0');
+    }
+    return d;
+  }
+  
+  // Get all unique times from appointments
+  const apptTimes = [...new Set(myAppts.map(a => a.time).filter(Boolean))].sort();
+  const baseTimes = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'];
+  const allTimes = [...new Set([...baseTimes, ...apptTimes])].sort();
+  
   let html = '';
-  times.forEach(t => {
-    html += '<div class="wgrid"><div class="wt">'+t+'</div>';
+  let hasAnyAppt = false;
+  
+  allTimes.forEach(t => {
+    let rowHtml = '<div class="wgrid"><div class="wt">'+t+'</div>';
+    let rowHasAppt = false;
     days.forEach(d => {
       const ds = d.toISOString().split('T')[0];
       const isToday = ds === today;
-      const slot = myAppts.find(a => a.date===ds && a.time===t && a.status!=='cancelled');
+      const slot = myAppts.find(a => normalizeDate(a.date)===ds && a.time===t && a.status!=='cancelled');
       const cls = slot ? (slot.status==='confirmed'?'aok':slot.status==='completed'?'adone':'apnd') : '';
-      html += '<div class="wc'+(isToday?' tc':'')+'">';
-      if (slot) html += '<div class="ap '+cls+'" onclick="editAppt(\''+slot.id+'\')">'+slot.clientName+'</div>';
-      html += '</div>';
+      rowHtml += '<div class="wc'+(isToday?' tc':'')+'">';
+      if (slot) {
+        rowHtml += '<div class="ap '+cls+'" onclick="editAppt(''+slot.id+'')">'+
+          '<div>'+slot.clientName+'</div>'+
+          '<div style="font-size:10px;opacity:.7">'+slot.time+'</div>'+
+        '</div>';
+        rowHasAppt = true;
+        hasAnyAppt = true;
+      }
+      rowHtml += '</div>';
     });
-    html += '</div>';
+    rowHtml += '</div>';
+    if (rowHasAppt) html += rowHtml;
   });
+  
+  // Always show base time grid
+  let baseHtml = '';
+  baseTimes.forEach(t => {
+    baseHtml += '<div class="wgrid"><div class="wt">'+t+'</div>';
+    days.forEach(d => {
+      const ds = d.toISOString().split('T')[0];
+      const isToday = ds === today;
+      const slot = myAppts.find(a => normalizeDate(a.date)===ds && a.time===t && a.status!=='cancelled');
+      const cls = slot ? (slot.status==='confirmed'?'aok':slot.status==='completed'?'adone':'apnd') : '';
+      baseHtml += '<div class="wc'+(isToday?' tc':'')+'">';
+      if (slot) {
+        baseHtml += '<div class="ap '+cls+'" onclick="editAppt(''+slot.id+'')">'+slot.clientName+'</div>';
+      }
+      baseHtml += '</div>';
+    });
+    baseHtml += '</div>';
+  });
+  
   const el = g('wcal-rows');
-  if (el) el.innerHTML = html;
+  if (el) el.innerHTML = baseHtml;
 }
 
 // ═══ BAD POINTS SYSTEM ═══
