@@ -2023,7 +2023,8 @@ async function loadClientData() {
   if (!CU||!UD) return;
   const name = UD.name||'לקוח';
   g('cl-name').textContent = name; g('cl-email').textContent = UD.email||'';
-  g('cl-av').textContent = name[0].toUpperCase();
+  if (UD.profilePicUrl) g('cl-av').innerHTML = `<img src="${UD.profilePicUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
+  else g('cl-av').textContent = name[0].toUpperCase();
   const snap = await get(ref(db,'appointments'));
   let mine = [];
   if (snap.exists()) snap.forEach(c => { const v=c.val(); if(v.clientId===CU.uid) mine.push({id:c.key,...v}); });
