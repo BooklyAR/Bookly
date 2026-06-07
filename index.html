@@ -1396,7 +1396,7 @@ function enterApp() {
   document.querySelectorAll('#nb1,#nb2').forEach(b => b.textContent = isBiz ? 'בעל עסק' : 'לקוח');
   updateSwPanel();
   listenNotifications();
-  if (isBiz) { goPage('dashboard-page'); loadDash(); }
+  if (isBiz) { goPage('dashboard-page'); }
   else { goPage('main-page'); loadBizGrid(); loadClientData(); }
 }
 
@@ -1626,7 +1626,13 @@ async function loadDash() {
     if (snap.exists()) snap.forEach(c => all.push({id:c.key,...c.val()}));
     const mine = all.filter(a => a.businessId === CU.uid);
     window._allAppts = mine;
-    console.log('loadDash: mine.length=', mine.length, 'businessId=', CU.uid);
+    console.log('=== DASH onValue ===');
+    console.log('Total appts in DB:', all.length);
+    console.log('My UID (businessId filter):', CU.uid);
+    console.log('My appts:', mine.length);
+    if (all.length > 0 && mine.length === 0) {
+      console.warn('⚠️ businessIds in DB:', [...new Set(all.map(a => a.businessId))]);
+    }
 
     const today = new Date().toISOString().split('T')[0];
     const todayA = mine.filter(a => a.date === today);
@@ -1677,8 +1683,10 @@ async function loadDash() {
 
 function renderApptsTable(appts) {
   const tb = g('appts-tb'); if (!tb) return;
+  console.log('renderApptsTable: appts.length=', appts?.length, '| _allAppts.length=', window._allAppts?.length);
   if (!appts || appts.length === 0) {
-    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--w50)">אין תורים · <span style="color:var(--p3);cursor:pointer" onclick="openM(\'m-appt\')">הוסף תור</span></td></tr>';
+    const bizId = CU?.uid || '—';
+    tb.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--w50)">אין תורים ל-${bizId.slice(0,8)}... · <span style="color:var(--p3);cursor:pointer" onclick="openM('m-appt')">הוסף תור</span></td></tr>`;
     return;
   }
   const sm = {confirmed:'bok confirmed',pending:'bpnd pending',completed:'bdone completed',cancelled:'bcancel cancelled'};
@@ -1818,7 +1826,7 @@ window.saveAppt = async function() {
       date: dt, time: tm, service: svc, notes, status: 'confirmed', createdAt: Date.now()
     });
     closeM('m-appt'); g('m-cname').value=''; g('m-cphone').value=''; g('m-notes').value='';
-    toast('✅ התור נשמר!'); loadDash();
+    toast('✅ התור נשמר!');
   } catch(e) { toast('⚠️ שגיאה: ' + e.message); }
 }
 
@@ -1847,7 +1855,7 @@ window.updateAppt = async function() {
       const lbl = statusLabels[newStatus] || 'עדכן';
       try { await sendNotification(appt.clientId, `העסק ${UD?.bizName||'העסק'} ${lbl} את התור שלך ב-${g('ea-date').value} בשעה ${g('ea-time').value}`, 'appt_update', id); } catch(e) {}
     }
-    closeM('m-edit-appt'); toast('✅ התור עודכן!'); loadDash();
+    closeM('m-edit-appt'); toast('✅ התור עודכן!');
   } catch(e) { toast('⚠️ שגיאה'); }
 }
 
@@ -1861,7 +1869,6 @@ window.cancelAppt = async function(id) {
       const addPt = confirm('האם להוסיף נקודה רעה ל-' + (appt.clientName||'לקוח') + '?');
       if (addPt) await addBadPoint(appt.clientId, appt.clientName);
     }
-    loadDash();
   } catch(e) { toast('⚠️ שגיאה'); }
 }
 window.markDone = async function(id) {
@@ -1871,7 +1878,7 @@ window.markDone = async function(id) {
     if (appt?.clientId) {
       try { await sendNotification(appt.clientId, `העסק ${UD?.bizName||'העסק'} אישר שהתור שלך ב-${appt.date} בשעה ${appt.time} הושלם ✅`, 'appt_done', id); } catch(e) {}
     }
-    toast('✅ סומן כהושלם!'); loadDash();
+    toast('✅ סומן כהושלם!');
   } catch(e) { toast('⚠️ שגיאה'); }
 }
 
